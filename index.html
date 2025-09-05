@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Калькулятор дальности дрона</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <h1>Калькулятор дальности радиосвязи дрона</h1>
+
+  <div class="calculate_group">
+    <label>Частота (МГц): <input type="number" id="freq" value="900"></label>
+    <label>Высота передатчика (м): <input type="number" id="h_tx" value="50"></label>
+    <label>Высота приёмника (м): <input type="number" id="h_rx" value="2"></label>
+    <label>Мощность передатчика (дБм): <input type="number" id="p_tx" value="20"></label>
+    <label>Усиление антенны передатчика (дБи): <input type="number" id="g_tx" value="2"></label>
+    <label>Усиление антенны приёмника (дБи): <input type="number" id="g_rx" value="3"></label>
+    <label>Чувствительность приёмника (дБм): <input type="number" id="sensitivity" value="-100"></label>
+    <label>Прочие потери (дБ): <input type="number" id="loss_other" value="3"></label>
+  </div>
+
+  <button onclick="calculate()">Рассчитать</button>
+
+  <div class="result" id="result"></div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

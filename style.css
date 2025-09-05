@@ -1,0 +1,28 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif; margin: 20px;
+}
+
+h1 {
+    font-size: 20px; 
+}
+
+label {
+    display: block; margin-top: 10px; 
+}
+
+input { 
+    padding: 5px; width: 200px; 
+}
+
+button { 
+    margin-top: 15px; padding: 10px; cursor: pointer; 
+}
+
+.result { 
+    margin-top: 20px; font-weight: bold; 
+}
