@@ -1,0 +1,166 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;  
+  background: #1c1b19;
+  overflow-x: hidden;  
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  background-size: 100% 2px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+
+body::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("https://www.transparenttextures.com/patterns/noise.png");
+  opacity: 0.05; 
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Блик (анимация) */
+.blink {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.03) 60%,
+    transparent 100%
+  );
+  background-size: 100% 300%; /* растягиваем, чтобы было плавно */
+  animation: blinkMove 25s linear infinite; /* медленно */
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes blinkMove {
+  0% {
+    background-position: 0 -150%;
+  }
+  100% {
+    background-position: 0 150%;
+  }
+}
+
+
+
+
+/* body {
+    background-color: black;
+} */
+
+.logotip_block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30vh;
+}
+
+.logotip_block img {
+    width: 80%;
+    margin-top: 50px;
+}
+
+.accordion-button::after {
+  filter: invert(1); 
+}
+
+
+.accordion-button:not(.collapsed) {
+  color: #fff;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+
+.accordion-button:not(.collapsed)::after {
+  filter: invert(1);
+}
+
+/* calculator */
+.form-control {
+  background-color: #222 !important;
+  border: 1px solid #444 !important;
+  color: #fff !important;
+}
+
+.form-control:focus {
+  background-color: #222 !important;
+  border-color: #f3b84b !important; 
+  box-shadow: none !important;
+  color: #fff !important;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #bbb;
+}
+
+.result {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.result .ok {
+  color: #f3b84b;
+}
+
+.btn-calc {
+  background-color: #f3b84b;
+  color: #1c1b19; 
+  font-weight: bold;
+  border: none;
+  box-shadow: 0 4px 10px rgba(243, 184, 75, 0.4);
+  transition: all 0.2s ease-in-out;
+}
+
+.accordion_section {
+  margin-top: 150px;
+}
+
+.btn-calc:hover {
+  background-color: #e0a93f;
+  box-shadow: 0 6px 14px rgba(243, 184, 75, 0.6);
+}
+
+
+/* Mobile */
+@media (min-width: 350px) and (max-width: 430px) {
+    .logotip_block {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 30vh;
+    }
+
+  .logotip_block img {
+      width: 80%;
+  }
+
+  .accordion_section {
+    margin-top: 15px;
+  }
+}

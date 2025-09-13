@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font Awesome -->
+    <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+    href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    rel="stylesheet"
+    />
+    <!-- MDB -->
+    <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/9.2.0/mdb.min.css"
+    rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css">
+    <title>СЕКТОР | СПЕЦИАЛЬНОЕ ОБОРУДОВАНИЕ ДЛЯ БПЛА</title>
+</head>
+<body>
+
+     <div class="blink"></div>
+    
+    <header>
+       
+        <div class="container logotip_block">
+            <img src="img/logo_text.svg" alt="logo">
+        </div>
+
+    </header>
+
+    <section class="accordion_section container">
+        
+        <div class="accordion" id="accordionExample">
+
+            <!-- Первая -->
+            <div class="accordion-item bg-transparent border border-secondary rounded-3 mb-2">
+                <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button collapsed bg-transparent text-white fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseOne"
+                    aria-expanded="false"
+                    aria-controls="collapseOne">
+                    Калькулятор дальности радиосвязи
+                </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse"
+                aria-labelledby="headingOne"
+                data-bs-parent="#accordionExample">
+
+                    <div class="accordion-body text-white">
+                        <form class="row g-3" onsubmit="event.preventDefault(); calculate();">
+                            <div class="col-md-6">
+                            <label for="freq" class="form-label">Частота (МГц)</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="freq" value="900">
+                            </div>
+                            <div class="col-md-6">
+                            <label for="h_tx" class="form-label">Высота передатчика (м)</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="h_tx" value="50">
+                            </div>
+                            <div class="col-md-6">
+                            <label for="h_rx" class="form-label">Высота приёмника (м)</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="h_rx" value="2">
+                            </div>
+                            <div class="col-md-6">
+                            <label for="p_tx" class="form-label">Мощность передатчика (дБм)</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="p_tx" value="20">
+                            </div>
+                            <div class="col-md-6">
+                            <label for="g_tx" class="form-label">Усиление антенны передатчика (дБи)</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="g_tx" value="2">
+                            </div>
+                            <div class="col-md-6">
+                            <label for="g_rx" class="form-label">Усиление антенны приёмника (дБи)</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="g_rx" value="3">
+                            </div>
+                            <div class="col-md-6">
+                            <label for="sensitivity" class="form-label">Чувствительность приёмника (дБм)</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="sensitivity" value="-100">
+                            </div>
+                            <div class="col-md-6">
+                            <label for="loss_other" class="form-label">Прочие потери (дБ)</label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="loss_other" value="3">
+                            </div>
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-calc w-100 fw-bold rounded-3">Рассчитать</button>
+                            </div>
+
+                            <div class="col-12">
+                            <div class="result mt-3" id="result"></div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Вторая -->
+            <div class="accordion-item bg-transparent border border-secondary rounded-3 mb-2">
+                <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed bg-transparent text-white fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo"
+                    aria-expanded="false"
+                    aria-controls="collapseTwo">
+                    Калькулятор гармоник
+                </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse"
+                aria-labelledby="headingTwo"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body text-white">
+                    !Контент!
+                </div>
+                </div>
+            </div>
+
+            <!-- Третья -->
+            <div class="accordion-item bg-transparent border border-secondary rounded-3 mb-2">
+                <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed bg-transparent text-white fw-bold"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseThree"
+                    aria-expanded="false"
+                    aria-controls="collapseThree">
+                    Подбор фильтров под используемое оборудование
+                </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse"
+                aria-labelledby="headingThree"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body text-white">
+                    !Контент!
+                </div>
+                </div>
+            </div>
+
+            </div>
+
+
+
+
+    </section>
+    <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="js/mdb.umd.min.js"></script>
+</body>
+</html>
