@@ -146,6 +146,27 @@ body::after {
   box-shadow: 0 6px 14px rgba(243, 184, 75, 0.6);
 }
 
+.input-group-text.dbm-label {
+  margin-right: 20px;
+}
+
+
+footer {
+  margin-top: 50px;
+}
+
+/* Справка */
+.calc-note {
+  font-size: 0.85rem;
+  color: #aaa;
+  border-left: 3px solid #f3b84b;
+  padding-left: 10px;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+
+
 
 /* Mobile */
 @media (min-width: 350px) and (max-width: 430px) {
