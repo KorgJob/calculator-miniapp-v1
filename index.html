@@ -29,7 +29,7 @@
     <header>
        
         <div class="container logotip_block">
-            <img src="logo_text.svg" alt="logo">
+            <img src="img/logo_text.svg" alt="logo">
         </div>
 
     </header>
@@ -130,7 +130,76 @@
                     aria-labelledby="headingTwo"
                     data-bs-parent="#accordionExample">
                     <div class="accordion-body text-white">
-                        !Контент!
+                        <!-- Калькулятор гармоник -->
+                         
+                        <form class="row g-3" onsubmit="event.preventDefault(); calculateHarmonics();">
+        <div class="col-md-4">
+          <label for="tx_freq" class="form-label">Частота передатчика</label>
+          <input type="number" step="0.001" id="tx_freq" class="form-control bg-dark text-white border-secondary" value="433">
+        </div>
+
+        <div class="col-md-4">
+          <label for="max_harm" class="form-label">Макс. номер гармоники</label>
+          <input type="number" step="1" id="max_harm" class="form-control bg-dark text-white border-secondary" value="20" min="1" max="200">
+        </div>
+
+        <div class="col-md-4">
+          <label for="bandwidth" class="form-label">Ширина канала (MHz)</label>
+          <input type="number" step="0.1" id="bandwidth" class="form-control bg-dark text-white border-secondary" value="20">
+        </div>
+
+        <!-- Диапазон приоритетный -->
+        <div class="col-md-6">
+          <label for="start_freq" class="form-label">Начальная частота (MHz) — приоритет</label>
+          <input type="number" step="0.001" id="start_freq" class="form-control bg-dark text-white border-secondary" placeholder="Напр. 1200">
+        </div>
+
+        <div class="col-md-6">
+          <label for="end_freq" class="form-label">Конечная частота (MHz) — приоритет</label>
+          <input type="number" step="0.001" id="end_freq" class="form-control bg-dark text-white border-secondary" placeholder="Напр. 1400">
+        </div>
+
+        <!-- Альтернатива: центр + ширина -->
+        <div class="col-md-12">
+          <label for="center_freq" class="form-label">Центральная частота (MHz)</label>
+          <input type="number" step="0.001" id="center_freq" class="form-control bg-dark text-white border-secondary" value="5865">
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-calc w-100 fw-bold rounded-3">Рассчитать</button>
+        </div>
+      </form>
+
+      <!-- Табы с кастомным стилем -->
+<ul class="nav nav-tabs custom-tabs mt-4" id="harmonicsTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="dirty-tab" data-bs-toggle="tab" data-bs-target="#dirty" type="button" role="tab">
+      Каналы с гармониками
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="clean-tab" data-bs-toggle="tab" data-bs-target="#clean" type="button" role="tab">
+      «Чистые» каналы
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content mt-3">
+  <div class="tab-pane fade show active" id="dirty" role="tabpanel" aria-labelledby="dirty-tab">
+    <div id="dirty-results" class="small text-muted">Здесь появятся каналы с гармониками после расчёта.</div>
+  </div>
+  <div class="tab-pane fade" id="clean" role="tabpanel" aria-labelledby="clean-tab">
+    <div id="clean-results" class="small text-muted">Здесь появятcя чистые каналы после расчёта.</div>
+  </div>
+</div>
+
+
+      <!-- Подсказка (пример) -->
+      <div class="calc-note mt-3">
+        Пример: tx_freq = 433, max_harm = 15, ширина = 20, центр = 5865
+      </div>
+
+
                     </div>
                     </div>
                 </div>
@@ -170,4 +239,5 @@
     <script src="mdb.umd.min.js"></script>
 </body>
 </html>
+
 
