@@ -166,6 +166,39 @@ footer {
 }
 
 
+/* Стили табов под твой дизайн */
+/* Таб-контейнер */
+.custom-tabs {
+  display: flex;
+  width: 100%;
+  border-bottom: 2px solid #444; /* общая линия снизу */
+}
+
+.custom-tabs .nav-item {
+  flex: 1;
+  text-align: center;
+}
+
+.custom-tabs .nav-link {
+  width: 100%;
+  color: #aaa;
+  background: transparent !important; /* убираем фон */
+  border: none !important;
+  border-radius: 0 !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Активный таб */
+/* Активный таб с фоном */
+.custom-tabs .nav-link.active {
+  color: #f3b84b !important;
+  border-bottom: 2px solid #f3b84b !important;
+}
+
+
+
 
 
 /* Mobile */
