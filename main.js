@@ -71,39 +71,63 @@ function isOverlap(aStart, aEnd, bStart, bEnd) {
 }
 function fmt(n){ return Number(n).toFixed(3).replace(/\.000$/, ''); }
 
+// --- синхронизация полей ---
+function syncFromRange() {
+  const start = parseFloat(document.getElementById('start_freq').value);
+  const end = parseFloat(document.getElementById('end_freq').value);
+  if (!isNaN(start) && !isNaN(end) && end > start) {
+    const center = (start + end) / 2;
+    const bw = end - start;
+    document.getElementById('center_freq').value = fmt(center);
+    document.getElementById('bandwidth').value = fmt(bw);
+  }
+}
+
+function syncFromCenter() {
+  const center = parseFloat(document.getElementById('center_freq').value);
+  const bw = parseFloat(document.getElementById('bandwidth').value);
+  if (!isNaN(center) && !isNaN(bw) && bw > 0) {
+    const start = center - bw / 2;
+    const end = center + bw / 2;
+    document.getElementById('start_freq').value = fmt(start);
+    document.getElementById('end_freq').value = fmt(end);
+  }
+}
+
+// навешиваем обработчики
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('start_freq').addEventListener('input', syncFromRange);
+  document.getElementById('end_freq').addEventListener('input', syncFromRange);
+  document.getElementById('center_freq').addEventListener('input', syncFromCenter);
+  document.getElementById('bandwidth').addEventListener('input', syncFromCenter);
+});
+
 function calculateHarmonics() {
   // элементы вывода
   const dirtyEl = document.getElementById('dirty-results');
   const cleanEl = document.getElementById('clean-results');
-  // очистить
   dirtyEl.innerHTML = '';
   cleanEl.innerHTML = '';
 
-  // чтение полей
-  const txFreq = parseFloat(document.getElementById('tx_freq').value) || 433;
-  const maxHarm = Math.max(1, Math.min(200, parseInt(document.getElementById('max_harm').value) || 20));
-  const bwInput = parseFloat(document.getElementById('bandwidth').value);
+  // фиксированные параметры
+  const txFreq = 433;
+  const maxHarm = 20;
+
+  // читаем диапазон
+  const bw = parseFloat(document.getElementById('bandwidth').value);
   const startInput = parseFloat(document.getElementById('start_freq').value);
   const endInput = parseFloat(document.getElementById('end_freq').value);
   const centerInput = parseFloat(document.getElementById('center_freq').value);
 
-  // валидный bw
-  if (isNaN(bwInput) || bwInput <= 0) {
-    dirtyEl.innerHTML = '<div class="text-warning">Ошибка: укажите корректную ширину канала (&gt;0).</div>';
-    return;
-  }
-  const bw = bwInput;
-
-  // диапазон (приоритет start/end)
   let rangeStart, rangeEnd;
   if (!isNaN(startInput) && !isNaN(endInput) && endInput > startInput) {
     rangeStart = startInput;
     rangeEnd = endInput;
-  } else if (!isNaN(centerInput)) {
+  } else if (!isNaN(centerInput) && !isNaN(bw) && bw > 0) {
     rangeStart = centerInput - bw/2;
     rangeEnd = centerInput + bw/2;
   } else {
-    dirtyEl.innerHTML = '<div class="text-warning">Ошибка: задайте диапазон (start/end) или центр+ширину.</div>';
+    dirtyEl.innerHTML = '<div class="text-warning">Ошибка: задайте корректные значения диапазона.</div>';
     return;
   }
 
@@ -119,9 +143,9 @@ function calculateHarmonics() {
     });
   }
 
-  // проверка каналов
-  const dirtyList = []; // {band, name, freq, overlaps: [{n, start,end}]}
-  const cleanList = []; // {band, name, freq}
+  // --- далее твоя логика проверки каналов (оставляем без изменений) ---
+  const dirtyList = [];
+  const cleanList = [];
 
   for (const [band, arr] of Object.entries(videoChannels)) {
     arr.forEach((entry, idx) => {
@@ -132,8 +156,6 @@ function calculateHarmonics() {
       const chStart = freq - bw/2;
       const chEnd = freq + bw/2;
 
-      // если пользователь интересуется только отдельным диапазоном, мы продолжаем проверять каналы в таблице;
-      // проверяем пересечения канала с гармониками
       const overlaps = harmonics.filter(h => isOverlap(h.start, h.end, chStart, chEnd))
                                 .map(h => ({n: h.n, start: h.start, end: h.end}));
 
@@ -145,11 +167,10 @@ function calculateHarmonics() {
     });
   }
 
-  // вывод грязных, сгруппировать по гармоникам (удобно для чтения)
+  // вывод грязных
   if (dirtyList.length === 0) {
-    dirtyEl.innerHTML = '<div class="text-success">Нет каналов, пересекающихся с гармониками (в выбранном диапазоне/ширине).</div>';
+    dirtyEl.innerHTML = '<div class="text-success">Нет каналов с гармониками.</div>';
   } else {
-    // сгруппируем по n
     const byHarm = {};
     dirtyList.forEach(d => {
       d.overlaps.forEach(o => {
@@ -177,7 +198,7 @@ function calculateHarmonics() {
     dirtyEl.appendChild(frag);
   }
 
-  // вывод чистых — сгруппировать по band
+  // вывод чистых
   if (cleanList.length === 0) {
     cleanEl.innerHTML = '<div class="text-muted">Нет чистых каналов.</div>';
   } else {
@@ -204,7 +225,7 @@ function calculateHarmonics() {
     cleanEl.appendChild(frag2);
   }
 
-  // авто-показ вкладки грязных, если есть
+  // авто-показ вкладки
   try {
     if (dirtyList.length > 0) {
       new bootstrap.Tab(document.getElementById('dirty-tab')).show();
@@ -213,3 +234,5 @@ function calculateHarmonics() {
     }
   } catch (e) {}
 }
+
+
