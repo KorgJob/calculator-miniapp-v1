@@ -55,31 +55,66 @@ function calculate() {
 }
 
 
-// Калькулятор гаромник
-/* Частоты видеоканалов (центры в MHz) */
+// Калькулятор гармоник
+// === Калькулятор гармоник (все диапазоны) ===
+
+// Все частоты популярных видеопередатчиков
 const videoChannels = {
-  A: [5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725],
-  B: [5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866],
-  E: [5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945],
-  F: [5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880],
-  R: [5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917],
-  L: [{name: 'L-1', f: 5362}, {name: 'L-2', f: 5399}, {name: 'L-7', f: 5584}, {name: 'L-8', f: 5621}]
+  '1.2G': [
+    1165, 1125, 1085, 1045, 1258, 1286, 1324, 1362
+  ],
+  '1.3G': [
+    1080, 1120, 1160, 1200, 1240, 1258, 1280, 1320
+  ],
+  '2.4G': [
+    2412, 2437, 2462, 2472, 2484, 5740, 5760, 5780, 5800
+  ],
+  '5.8G-A': [5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725],
+  '5.8G-B': [5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866],
+  '5.8G-E': [5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945],
+  '5.8G-F': [5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880],
+  '5.8G-R': [5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917],
+  '5.8G-L': [
+    { name: 'L-1', f: 5362 },
+    { name: 'L-2', f: 5399 },
+    { name: 'L-3', f: 5436 },
+    { name: 'L-4', f: 5473 },
+    { name: 'L-5', f: 5510 },
+    { name: 'L-6', f: 5547 },
+    { name: 'L-7', f: 5584 },
+    { name: 'L-8', f: 5621 }
+  ],
+  '3.3G': [
+    3300, 3320, 3340, 3360, 3380, 3400, 3420, 3440
+  ],
+  '900M': [
+    910, 920, 930, 940, 950, 960, 970, 980
+  ],
+  '800M': [
+    810, 820, 830, 840, 850, 860, 870, 880
+  ]
 };
 
+// вспомогательные функции
 function isOverlap(aStart, aEnd, bStart, bEnd) {
   return aStart <= bEnd && bStart <= aEnd;
 }
-function fmt(n){ return Number(n).toFixed(3).replace(/\.000$/, ''); }
+
+function fmt(n) {
+  return Number(n).toFixed(3).replace(/\.000$/, '');
+}
 
 // --- синхронизация полей ---
 function syncFromRange() {
   const start = parseFloat(document.getElementById('start_freq').value);
   const end = parseFloat(document.getElementById('end_freq').value);
-  if (!isNaN(start) && !isNaN(end) && end > start) {
-    const center = (start + end) / 2;
-    const bw = end - start;
-    document.getElementById('center_freq').value = fmt(center);
-    document.getElementById('bandwidth').value = fmt(bw);
+  if (!isNaN(start) && !isNaN(end)) {
+    if (end > start) {
+      const center = (start + end) / 2;
+      const bw = end - start;
+      document.getElementById('center_freq').value = fmt(center);
+      document.getElementById('bandwidth').value = fmt(bw);
+    }
   }
 }
 
@@ -94,7 +129,7 @@ function syncFromCenter() {
   }
 }
 
-// навешиваем обработчики
+// обработчики полей ввода
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('start_freq').addEventListener('input', syncFromRange);
   document.getElementById('end_freq').addEventListener('input', syncFromRange);
@@ -102,72 +137,91 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('bandwidth').addEventListener('input', syncFromCenter);
 });
 
+// === основной расчёт ===
 function calculateHarmonics() {
-  // элементы вывода
   const dirtyEl = document.getElementById('dirty-results');
   const cleanEl = document.getElementById('clean-results');
   dirtyEl.innerHTML = '';
   cleanEl.innerHTML = '';
 
-  // фиксированные параметры
-  const txFreq = 433;
-  const maxHarm = 20;
+  const maxHarm = 30;   // увеличил количество гармоник для покрытия всех диапазонов
 
-  // читаем диапазон
   const bw = parseFloat(document.getElementById('bandwidth').value);
   const startInput = parseFloat(document.getElementById('start_freq').value);
   const endInput = parseFloat(document.getElementById('end_freq').value);
   const centerInput = parseFloat(document.getElementById('center_freq').value);
 
-  let rangeStart, rangeEnd;
-  if (!isNaN(startInput) && !isNaN(endInput) && endInput > startInput) {
-    rangeStart = startInput;
-    rangeEnd = endInput;
-  } else if (!isNaN(centerInput) && !isNaN(bw) && bw > 0) {
-    rangeStart = centerInput - bw/2;
-    rangeEnd = centerInput + bw/2;
-  } else {
-    dirtyEl.innerHTML = '<div class="text-warning">Ошибка: задайте корректные значения диапазона.</div>';
+  // --- проверки ввода ---
+  if (!isNaN(startInput) && !isNaN(endInput)) {
+    if (startInput >= endInput) {
+      dirtyEl.innerHTML = '<div class="text-warning">Ошибка: начальная частота должна быть ниже конечной.</div>';
+      return;
+    }
+  }
+  if (isNaN(bw) || bw <= 0) {
+    dirtyEl.innerHTML = '<div class="text-warning">Ошибка: ширина канала должна быть больше нуля.</div>';
     return;
   }
 
-  // постройка гармоник
+  let rangeStart, rangeEnd, centerFreq;
+  if (!isNaN(startInput) && !isNaN(endInput) && endInput > startInput) {
+    rangeStart = startInput;
+    rangeEnd = endInput;
+    centerFreq = (startInput + endInput) / 2;
+  } else if (!isNaN(centerInput) && !isNaN(bw) && bw > 0) {
+    centerFreq = centerInput;
+    rangeStart = centerInput - bw / 2;
+    rangeEnd = centerInput + bw / 2;
+  } else {
+    dirtyEl.innerHTML = '<div class="text-warning">Ошибка: задайте диапазон (start/end) или центр+ширину.</div>';
+    return;
+  }
+
+  // --- строим зонные гармоники от центральной частоты ---
   const harmonics = [];
   for (let n = 1; n <= maxHarm; n++) {
-    const center = txFreq * n;
+    const harmonicCenter = centerFreq * n;
     harmonics.push({
       n,
-      center,
-      start: center - bw/2,
-      end: center + bw/2
+      center: harmonicCenter,
+      start: harmonicCenter - bw / 2,
+      end: harmonicCenter + bw / 2
     });
   }
 
-  // --- далее твоя логика проверки каналов (оставляем без изменений) ---
+  checkChannels(harmonics, bw, dirtyEl, cleanEl, centerFreq);
+}
+
+// === проверка каналов на пересечение ===
+function checkChannels(harmonics, bw, dirtyEl, cleanEl, centerFreq) {
   const dirtyList = [];
   const cleanList = [];
 
   for (const [band, arr] of Object.entries(videoChannels)) {
     arr.forEach((entry, idx) => {
       let name, freq;
-      if (typeof entry === 'object') { name = entry.name; freq = entry.f; }
-      else { name = `${band}-${idx+1}`; freq = entry; }
+      if (typeof entry === 'object') {
+        name = entry.name;
+        freq = entry.f;
+      } else {
+        name = `${band}-${idx + 1}`;
+        freq = entry;
+      }
 
-      const chStart = freq - bw/2;
-      const chEnd = freq + bw/2;
+      const chStart = freq - bw / 2;
+      const chEnd = freq + bw / 2;
 
-      const overlaps = harmonics.filter(h => isOverlap(h.start, h.end, chStart, chEnd))
-                                .map(h => ({n: h.n, start: h.start, end: h.end}));
+      const overlaps = harmonics.filter(h => isOverlap(h.start, h.end, chStart, chEnd));
 
       if (overlaps.length > 0) {
-        dirtyList.push({band, name, freq, overlaps});
+        dirtyList.push({ band, name, freq, overlaps });
       } else {
-        cleanList.push({band, name, freq});
+        cleanList.push({ band, name, freq });
       }
     });
   }
 
-  // вывод грязных
+  // вывод грязных (по гармоникам в порядке)
   if (dirtyList.length === 0) {
     dirtyEl.innerHTML = '<div class="text-success">Нет каналов с гармониками.</div>';
   } else {
@@ -175,24 +229,41 @@ function calculateHarmonics() {
     dirtyList.forEach(d => {
       d.overlaps.forEach(o => {
         if (!byHarm[o.n]) byHarm[o.n] = [];
-        byHarm[o.n].push({channel: `${d.name} (${d.freq} MHz)`, overlap: o});
+        byHarm[o.n].push({ 
+          channel: `${d.name} (${d.freq} MHz)`, 
+          range: o,
+          band: d.band
+        });
       });
     });
 
     const frag = document.createElement('div');
-    Object.keys(byHarm).sort((a,b)=>a-b).forEach(nKey => {
-      const n = parseInt(nKey,10);
-      const h = harmonics.find(hh => hh.n === n);
+    Object.keys(byHarm).map(Number).sort((a, b) => a - b).forEach(n => {
       const hdr = document.createElement('div');
-      hdr.className = 'mt-2 mb-1';
-      hdr.innerHTML = `<strong class="text-danger">Гармоника #${n} (${fmt(h.start)} – ${fmt(h.end)} MHz)</strong>`;
+      hdr.className = 'mt-3 mb-2 p-2 bg-dark rounded';
+      hdr.innerHTML = `<strong class="text-warning">Гармоника #${n}</strong> 
+        <small class="text-muted">(${fmt(harmonics[n-1].start)}–${fmt(harmonics[n-1].end)} MHz)</small>`;
       frag.appendChild(hdr);
 
+      // Группируем по диапазонам
+      const byBand = {};
       byHarm[n].forEach(it => {
-        const row = document.createElement('div');
-        row.className = 'mb-1';
-        row.innerHTML = `<span class="badge bg-danger me-2">${it.channel}</span> <small class="text-muted">пересечение: ${fmt(it.overlap.start)}–${fmt(it.overlap.end)} MHz</small>`;
-        frag.appendChild(row);
+        if (!byBand[it.band]) byBand[it.band] = [];
+        byBand[it.band].push(it);
+      });
+
+      Object.keys(byBand).sort().forEach(band => {
+        const bandHeader = document.createElement('div');
+        bandHeader.className = 'small text-muted mb-1';
+        bandHeader.textContent = `Диапазон ${band}:`;
+        frag.appendChild(bandHeader);
+
+        byBand[band].forEach(it => {
+          const row = document.createElement('div');
+          row.className = 'mb-1 ps-3';
+          row.innerHTML = `<span class="badge bg-danger me-2">${it.channel}</span>`;
+          frag.appendChild(row);
+        });
       });
     });
     dirtyEl.appendChild(frag);
@@ -207,32 +278,39 @@ function calculateHarmonics() {
       if (!grouped[c.band]) grouped[c.band] = [];
       grouped[c.band].push(c);
     });
+
     const frag2 = document.createElement('div');
     Object.keys(grouped).sort().forEach(b => {
       const hdr = document.createElement('div');
-      hdr.className = 'mt-2';
+      hdr.className = 'mt-3 mb-2';
       hdr.innerHTML = `<strong class="text-success">Диапазон ${b}</strong>`;
       frag2.appendChild(hdr);
-      const wrap = document.createElement('div');
+
+      const channelsContainer = document.createElement('div');
+      channelsContainer.className = 'd-flex flex-wrap gap-2 mb-3';
+      
       grouped[b].forEach(c => {
         const el = document.createElement('span');
-        el.className = 'badge bg-success me-2 mb-2';
+        el.className = 'badge bg-success';
         el.textContent = `${c.name} (${c.freq} MHz)`;
-        wrap.appendChild(el);
+        channelsContainer.appendChild(el);
       });
-      frag2.appendChild(wrap);
+      
+      frag2.appendChild(channelsContainer);
     });
     cleanEl.appendChild(frag2);
   }
 
-  // авто-показ вкладки
+  // переключаем вкладку
   try {
     if (dirtyList.length > 0) {
       new bootstrap.Tab(document.getElementById('dirty-tab')).show();
     } else {
       new bootstrap.Tab(document.getElementById('clean-tab')).show();
     }
-  } catch (e) {}
+  } catch (e) {
+    console.log('Bootstrap Tab error:', e);
+  }
 }
 
 
