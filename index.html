@@ -133,42 +133,30 @@
                         <!-- Калькулятор гармоник -->
                          
                         <form class="row g-3" onsubmit="event.preventDefault(); calculateHarmonics();">
-        <div class="col-md-4">
-          <label for="tx_freq" class="form-label">Частота передатчика</label>
-          <input type="number" step="0.001" id="tx_freq" class="form-control bg-dark text-white border-secondary" value="433">
-        </div>
+  <div class="col-md-6">
+    <label for="start_freq" class="form-label">Начальная частота (MHz)</label>
+    <input type="number" step="0.001" id="start_freq" class="form-control bg-dark text-white border-secondary">
+  </div>
 
-        <div class="col-md-4">
-          <label for="max_harm" class="form-label">Макс. номер гармоники</label>
-          <input type="number" step="1" id="max_harm" class="form-control bg-dark text-white border-secondary" value="20" min="1" max="200">
-        </div>
+  <div class="col-md-6">
+    <label for="end_freq" class="form-label">Конечная частота (MHz)</label>
+    <input type="number" step="0.001" id="end_freq" class="form-control bg-dark text-white border-secondary">
+  </div>
 
-        <div class="col-md-4">
-          <label for="bandwidth" class="form-label">Ширина канала (MHz)</label>
-          <input type="number" step="0.1" id="bandwidth" class="form-control bg-dark text-white border-secondary" value="20">
-        </div>
+  <div class="col-md-6">
+    <label for="center_freq" class="form-label">Центральная частота (MHz)</label>
+    <input type="number" step="0.001" id="center_freq" class="form-control bg-dark text-white border-secondary" value="5865">
+  </div>
 
-        <!-- Диапазон приоритетный -->
-        <div class="col-md-6">
-          <label for="start_freq" class="form-label">Начальная частота (MHz) — приоритет</label>
-          <input type="number" step="0.001" id="start_freq" class="form-control bg-dark text-white border-secondary" placeholder="Напр. 1200">
-        </div>
+  <div class="col-md-6">
+    <label for="bandwidth" class="form-label">Ширина канала (MHz)</label>
+    <input type="number" step="0.1" id="bandwidth" class="form-control bg-dark text-white border-secondary" value="20">
+  </div>
 
-        <div class="col-md-6">
-          <label for="end_freq" class="form-label">Конечная частота (MHz) — приоритет</label>
-          <input type="number" step="0.001" id="end_freq" class="form-control bg-dark text-white border-secondary" placeholder="Напр. 1400">
-        </div>
-
-        <!-- Альтернатива: центр + ширина -->
-        <div class="col-md-12">
-          <label for="center_freq" class="form-label">Центральная частота (MHz)</label>
-          <input type="number" step="0.001" id="center_freq" class="form-control bg-dark text-white border-secondary" value="5865">
-        </div>
-
-        <div class="col-12">
-          <button type="submit" class="btn btn-calc w-100 fw-bold rounded-3">Рассчитать</button>
-        </div>
-      </form>
+  <div class="col-12">
+    <button type="submit" class="btn btn-calc w-100 fw-bold rounded-3">Рассчитать</button>
+  </div>
+</form>
 
       <!-- Табы с кастомным стилем -->
 <ul class="nav nav-tabs custom-tabs mt-4" id="harmonicsTab" role="tablist">
@@ -239,6 +227,7 @@
     <script src="mdb.umd.min.js"></script>
 </body>
 </html>
+
 
 
 
