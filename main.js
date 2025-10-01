@@ -56,7 +56,7 @@ function calculate() {
 
 
 // Калькулятор гармоник
-// === Калькулятор гармоник (все диапазоны) ===
+// === Калькулятор гармоник (исправленный расчет гармоник) ===
 
 // Все частоты популярных видеопередатчиков
 const videoChannels = {
@@ -144,7 +144,7 @@ function calculateHarmonics() {
   dirtyEl.innerHTML = '';
   cleanEl.innerHTML = '';
 
-  const maxHarm = 30;   // увеличил количество гармоник для покрытия всех диапазонов
+  const maxHarm = 30;
 
   const bw = parseFloat(document.getElementById('bandwidth').value);
   const startInput = parseFloat(document.getElementById('start_freq').value);
@@ -163,13 +163,11 @@ function calculateHarmonics() {
     return;
   }
 
-  let rangeStart, rangeEnd, centerFreq;
+  let rangeStart, rangeEnd;
   if (!isNaN(startInput) && !isNaN(endInput) && endInput > startInput) {
     rangeStart = startInput;
     rangeEnd = endInput;
-    centerFreq = (startInput + endInput) / 2;
   } else if (!isNaN(centerInput) && !isNaN(bw) && bw > 0) {
-    centerFreq = centerInput;
     rangeStart = centerInput - bw / 2;
     rangeEnd = centerInput + bw / 2;
   } else {
@@ -177,23 +175,28 @@ function calculateHarmonics() {
     return;
   }
 
-  // --- строим зонные гармоники от центральной частоты ---
+  // --- ПРАВИЛЬНЫЙ РАСЧЕТ ГАРМОНИК ---
+  // Гармоника #1: диапазон × 2
+  // Гармоника #2: диапазон × 3
+  // Гармоника #5: диапазон × 6
   const harmonics = [];
   for (let n = 1; n <= maxHarm; n++) {
-    const harmonicCenter = centerFreq * n;
+    const multiplier = n + 1; // гармоника #n = умножение на (n+1)
+    const harmStart = rangeStart * multiplier;
+    const harmEnd = rangeEnd * multiplier;
+    
     harmonics.push({
-      n,
-      center: harmonicCenter,
-      start: harmonicCenter - bw / 2,
-      end: harmonicCenter + bw / 2
+      n: n, // гармоника #1, #2, #3 и т.д.
+      start: harmStart,
+      end: harmEnd
     });
   }
 
-  checkChannels(harmonics, bw, dirtyEl, cleanEl, centerFreq);
+  checkChannels(harmonics, bw, dirtyEl, cleanEl);
 }
 
 // === проверка каналов на пересечение ===
-function checkChannels(harmonics, bw, dirtyEl, cleanEl, centerFreq) {
+function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
   const dirtyList = [];
   const cleanList = [];
 
@@ -312,5 +315,6 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl, centerFreq) {
     console.log('Bootstrap Tab error:', e);
   }
 }
+
 
 
