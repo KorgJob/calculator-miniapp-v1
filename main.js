@@ -56,7 +56,7 @@ function calculate() {
 
 
 // Калькулятор гармоник
-// === Калькулятор гармоник (исправленный расчет гармоник) ===
+// === Калькулятор гармоник (финальная версия) ===
 
 // Все частоты популярных видеопередатчиков
 const videoChannels = {
@@ -197,9 +197,54 @@ function calculateHarmonics() {
 
 // === проверка каналов на пересечение ===
 function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
-  const dirtyList = [];
+  const allHarmonicsList = [];
   const cleanList = [];
 
+  // Минимальная частота для проверки пересечений - 1080 МГц
+  const minCheckFreq = 1080;
+
+  // Для каждой гармоники находим пересечения
+  harmonics.forEach(h => {
+    const overlaps = [];
+    
+    // Проверяем, находится ли гармоника выше минимальной частоты 1080 МГц
+    const isAboveMinFreq = h.end >= minCheckFreq - bw / 2;
+    
+    if (isAboveMinFreq) {
+      // Только для гармоник выше 1080 МГц проверяем пересечения
+      for (const [band, arr] of Object.entries(videoChannels)) {
+        arr.forEach((entry, idx) => {
+          let name, freq;
+          if (typeof entry === 'object') {
+            name = entry.name;
+            freq = entry.f;
+          } else {
+            name = `${band}-${idx + 1}`;
+            freq = entry;
+          }
+
+          // Проверяем только каналы выше 1080 МГц
+          if (freq >= 1080) {
+            const chStart = freq - bw / 2;
+            const chEnd = freq + bw / 2;
+
+            if (isOverlap(h.start, h.end, chStart, chEnd)) {
+              overlaps.push({ band, name, freq });
+            }
+          }
+        });
+      }
+    }
+
+    // Добавляем гармонику в общий список
+    allHarmonicsList.push({
+      harmonic: h,
+      overlaps: overlaps,
+      isAboveMinFreq: isAboveMinFreq
+    });
+  });
+
+  // Собираем список чистых каналов (без пересечений с любой гармоникой)
   for (const [band, arr] of Object.entries(videoChannels)) {
     arr.forEach((entry, idx) => {
       let name, freq;
@@ -211,102 +256,97 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
         freq = entry;
       }
 
-      const chStart = freq - bw / 2;
-      const chEnd = freq + bw / 2;
+      // Только каналы выше 1080 МГц
+      if (freq >= 1080) {
+        const chStart = freq - bw / 2;
+        const chEnd = freq + bw / 2;
 
-      const overlaps = harmonics.filter(h => isOverlap(h.start, h.end, chStart, chEnd));
-
-      if (overlaps.length > 0) {
-        dirtyList.push({ band, name, freq, overlaps });
-      } else {
-        cleanList.push({ band, name, freq });
+        const hasAnyOverlap = harmonics.some(h => isOverlap(h.start, h.end, chStart, chEnd));
+        
+        if (!hasAnyOverlap) {
+          cleanList.push({ band, name, freq });
+        }
       }
     });
   }
 
-  // вывод грязных (по гармоникам в порядке)
-  if (dirtyList.length === 0) {
-    dirtyEl.innerHTML = '<div class="text-success">Нет каналов с гармониками.</div>';
+  // ВЫВОД ВСЕХ ГАРМОНИК
+  if (allHarmonicsList.length === 0) {
+    dirtyEl.innerHTML = '<div class="text-success">Нет рассчитанных гармоник.</div>';
   } else {
-    const byHarm = {};
-    dirtyList.forEach(d => {
-      d.overlaps.forEach(o => {
-        if (!byHarm[o.n]) byHarm[o.n] = [];
-        byHarm[o.n].push({ 
-          channel: `${d.name} (${d.freq} MHz)`, 
-          range: o,
-          band: d.band
-        });
-      });
-    });
-
     const frag = document.createElement('div');
-    Object.keys(byHarm).map(Number).sort((a, b) => a - b).forEach(n => {
+    
+    allHarmonicsList.forEach(item => {
+      const h = item.harmonic;
+      const overlaps = item.overlaps;
+      const isAboveMinFreq = item.isAboveMinFreq;
+      
       const hdr = document.createElement('div');
       hdr.className = 'mt-3 mb-2 p-2 bg-dark rounded';
-      hdr.innerHTML = `<strong class="text-warning">Гармоника #${n}</strong> 
-        <small class="text-muted">(${fmt(harmonics[n-1].start)}–${fmt(harmonics[n-1].end)} MHz)</small>`;
+      hdr.innerHTML = `<strong class="text-warning">Гармоника #${h.n}</strong> 
+        <small class="text-muted">(${fmt(h.start)}–${fmt(h.end)} MHz)</small>`;
       frag.appendChild(hdr);
 
-      // Группируем по диапазонам
-      const byBand = {};
-      byHarm[n].forEach(it => {
-        if (!byBand[it.band]) byBand[it.band] = [];
-        byBand[it.band].push(it);
-      });
+      if (!isAboveMinFreq) {
+        // Для гармоник ниже 1080 МГц
+        const belowMinMsg = document.createElement('div');
+        belowMinMsg.className = 'small text-muted ps-3 mb-2';
+        belowMinMsg.textContent = 'Нет пересечений с видеоканалами';
+        frag.appendChild(belowMinMsg);
+      } else {
+        // Для гармоник выше 1080 МГц
+        if (overlaps.length > 0) {
+          // Сортируем каналы по частоте
+          overlaps.sort((a, b) => a.freq - b.freq);
 
-      Object.keys(byBand).sort().forEach(band => {
-        const bandHeader = document.createElement('div');
-        bandHeader.className = 'small text-muted mb-1';
-        bandHeader.textContent = `Диапазон ${band}:`;
-        frag.appendChild(bandHeader);
-
-        byBand[band].forEach(it => {
-          const row = document.createElement('div');
-          row.className = 'mb-1 ps-3';
-          row.innerHTML = `<span class="badge bg-danger me-2">${it.channel}</span>`;
-          frag.appendChild(row);
-        });
-      });
+          // Выводим все каналы в один список
+          overlaps.forEach(ov => {
+            const row = document.createElement('div');
+            row.className = 'mb-1 ps-3';
+            row.innerHTML = `<span class="badge bg-danger me-2">${ov.freq} MHz</span>`;
+            frag.appendChild(row);
+          });
+        } else {
+          // Если пересечений нет, но гармоника выше 1080 МГц
+          const noOverlapMsg = document.createElement('div');
+          noOverlapMsg.className = 'small text-muted ps-3 mb-2';
+          noOverlapMsg.textContent = 'Нет пересечений с видеоканалами';
+          frag.appendChild(noOverlapMsg);
+        }
+      }
     });
+    
     dirtyEl.appendChild(frag);
   }
 
-  // вывод чистых
+  // вывод чистых каналов (только частоты выше 1080 МГц)
   if (cleanList.length === 0) {
     cleanEl.innerHTML = '<div class="text-muted">Нет чистых каналов.</div>';
   } else {
-    const grouped = {};
-    cleanList.forEach(c => {
-      if (!grouped[c.band]) grouped[c.band] = [];
-      grouped[c.band].push(c);
-    });
-
     const frag2 = document.createElement('div');
-    Object.keys(grouped).sort().forEach(b => {
-      const hdr = document.createElement('div');
-      hdr.className = 'mt-3 mb-2';
-      hdr.innerHTML = `<strong class="text-success">Диапазон ${b}</strong>`;
-      frag2.appendChild(hdr);
-
-      const channelsContainer = document.createElement('div');
-      channelsContainer.className = 'd-flex flex-wrap gap-2 mb-3';
-      
-      grouped[b].forEach(c => {
-        const el = document.createElement('span');
-        el.className = 'badge bg-success';
-        el.textContent = `${c.name} (${c.freq} MHz)`;
-        channelsContainer.appendChild(el);
-      });
-      
-      frag2.appendChild(channelsContainer);
+    
+    // Собираем все чистые каналы в один список и сортируем по частоте
+    const allCleanChannels = [];
+    cleanList.forEach(c => {
+      allCleanChannels.push({ freq: c.freq });
     });
+    
+    allCleanChannels.sort((a, b) => a.freq - b.freq);
+    
+    // Выводим все чистые каналы
+    allCleanChannels.forEach(c => {
+      const el = document.createElement('span');
+      el.className = 'badge bg-success me-2 mb-2';
+      el.textContent = `${c.freq} MHz`;
+      frag2.appendChild(el);
+    });
+    
     cleanEl.appendChild(frag2);
   }
 
   // переключаем вкладку
   try {
-    if (dirtyList.length > 0) {
+    if (allHarmonicsList.some(item => item.overlaps.length > 0)) {
       new bootstrap.Tab(document.getElementById('dirty-tab')).show();
     } else {
       new bootstrap.Tab(document.getElementById('clean-tab')).show();
@@ -315,6 +355,8 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
     console.log('Bootstrap Tab error:', e);
   }
 }
+
+
 
 
 
