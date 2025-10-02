@@ -56,7 +56,7 @@ function calculate() {
 
 
 // Калькулятор гармоник
-// === Калькулятор гармоник (финальная версия) ===
+// === Калькулятор гармоник (ограничение до 7300 MHz) ===
 
 // Все частоты популярных видеопередатчиков
 const videoChannels = {
@@ -67,7 +67,19 @@ const videoChannels = {
     1080, 1120, 1160, 1200, 1240, 1258, 1280, 1320
   ],
   '2.4G': [
-    2412, 2437, 2462, 2472, 2484, 5740, 5760, 5780, 5800
+    2412, 2437, 2462, 2472, 2484
+  ],
+  '3.3G': [
+    3300, 3320, 3340, 3360, 3380, 3400, 3420, 3440
+  ],
+  '5.2G': [
+    5180, 5200, 5220, 5240, 5260, 5280, 5300, 5320
+  ],
+  '5.3G': [
+    5500, 5520, 5540, 5560, 5580, 5600, 5620, 5640
+  ],
+  '5.6G': [
+    5650, 5670, 5690, 5710, 5730, 5750, 5770, 5790
   ],
   '5.8G-A': [5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725],
   '5.8G-B': [5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866],
@@ -84,8 +96,14 @@ const videoChannels = {
     { name: 'L-7', f: 5584 },
     { name: 'L-8', f: 5621 }
   ],
-  '3.3G': [
-    3300, 3320, 3340, 3360, 3380, 3400, 3420, 3440
+  '6.0G': [
+    5955, 5975, 5995, 6015, 6035, 6055, 6075, 6095
+  ],
+  '6.5G': [
+    6425, 6445, 6465, 6485, 6505, 6525, 6545, 6565
+  ],
+  '7.0G': [
+    6850, 6870, 6890, 6910, 6930, 6950, 6970, 6990
   ],
   '900M': [
     910, 920, 930, 940, 950, 960, 970, 980
@@ -144,7 +162,7 @@ function calculateHarmonics() {
   dirtyEl.innerHTML = '';
   cleanEl.innerHTML = '';
 
-  const maxHarm = 30;
+  const maxFreqLimit = 7300; // Максимальная частота гармоник
 
   const bw = parseFloat(document.getElementById('bandwidth').value);
   const startInput = parseFloat(document.getElementById('start_freq').value);
@@ -175,21 +193,30 @@ function calculateHarmonics() {
     return;
   }
 
-  // --- ПРАВИЛЬНЫЙ РАСЧЕТ ГАРМОНИК ---
-  // Гармоника #1: диапазон × 2
-  // Гармоника #2: диапазон × 3
-  // Гармоника #5: диапазон × 6
+  // --- ПРАВИЛЬНЫЙ РАСЧЕТ ГАРМОНИК с ограничением до 7300 MHz ---
   const harmonics = [];
-  for (let n = 1; n <= maxHarm; n++) {
-    const multiplier = n + 1; // гармоника #n = умножение на (n+1)
+  let n = 1;
+  
+  while (true) {
+    const multiplier = n + 1;
     const harmStart = rangeStart * multiplier;
     const harmEnd = rangeEnd * multiplier;
     
+    // Если гармоника превышает лимит - останавливаемся
+    if (harmStart > maxFreqLimit) {
+      break;
+    }
+    
     harmonics.push({
-      n: n, // гармоника #1, #2, #3 и т.д.
+      n: n,
       start: harmStart,
       end: harmEnd
     });
+    
+    n++;
+    
+    // Защита от бесконечного цикла
+    if (n > 100) break;
   }
 
   checkChannels(harmonics, bw, dirtyEl, cleanEl);
@@ -355,8 +382,6 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
     console.log('Bootstrap Tab error:', e);
   }
 }
-
-
 
 
 
