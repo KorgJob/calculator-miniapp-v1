@@ -56,7 +56,7 @@ function calculate() {
 
 
 // Калькулятор гармоник
-// === Калькулятор гармоник (ограничение до 7300 MHz) ===
+// === Калькулятор гармоник (разрешены одинаковые частоты + группировка чистых каналов) ===
 
 // Все частоты популярных видеопередатчиков
 const videoChannels = {
@@ -127,19 +127,17 @@ function syncFromRange() {
   const start = parseFloat(document.getElementById('start_freq').value);
   const end = parseFloat(document.getElementById('end_freq').value);
   if (!isNaN(start) && !isNaN(end)) {
-    if (end > start) {
-      const center = (start + end) / 2;
-      const bw = end - start;
-      document.getElementById('center_freq').value = fmt(center);
-      document.getElementById('bandwidth').value = fmt(bw);
-    }
+    const center = (start + end) / 2;
+    const bw = Math.max(0, end - start); // Ширина может быть 0
+    document.getElementById('center_freq').value = fmt(center);
+    document.getElementById('bandwidth').value = fmt(bw);
   }
 }
 
 function syncFromCenter() {
   const center = parseFloat(document.getElementById('center_freq').value);
   const bw = parseFloat(document.getElementById('bandwidth').value);
-  if (!isNaN(center) && !isNaN(bw) && bw > 0) {
+  if (!isNaN(center) && !isNaN(bw) && bw >= 0) { // Разрешена ширина 0
     const start = center - bw / 2;
     const end = center + bw / 2;
     document.getElementById('start_freq').value = fmt(start);
@@ -171,21 +169,21 @@ function calculateHarmonics() {
 
   // --- проверки ввода ---
   if (!isNaN(startInput) && !isNaN(endInput)) {
-    if (startInput >= endInput) {
-      dirtyEl.innerHTML = '<div class="text-warning">Ошибка: начальная частота должна быть ниже конечной.</div>';
+    if (startInput > endInput) { // Убрал >=, теперь можно start = end
+      dirtyEl.innerHTML = '<div class="text-warning">Ошибка: начальная частота не может быть выше конечной.</div>';
       return;
     }
   }
-  if (isNaN(bw) || bw <= 0) {
-    dirtyEl.innerHTML = '<div class="text-warning">Ошибка: ширина канала должна быть больше нуля.</div>';
+  if (isNaN(bw) || bw < 0) { // Разрешена ширина 0
+    dirtyEl.innerHTML = '<div class="text-warning">Ошибка: ширина канала не может быть отрицательной.</div>';
     return;
   }
 
   let rangeStart, rangeEnd;
-  if (!isNaN(startInput) && !isNaN(endInput) && endInput > startInput) {
+  if (!isNaN(startInput) && !isNaN(endInput) && endInput >= startInput) { // Разрешено start = end
     rangeStart = startInput;
     rangeEnd = endInput;
-  } else if (!isNaN(centerInput) && !isNaN(bw) && bw > 0) {
+  } else if (!isNaN(centerInput) && !isNaN(bw) && bw >= 0) { // Разрешена ширина 0
     rangeStart = centerInput - bw / 2;
     rangeEnd = centerInput + bw / 2;
   } else {
@@ -301,73 +299,87 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
   if (allHarmonicsList.length === 0) {
     dirtyEl.innerHTML = '<div class="text-success">Нет рассчитанных гармоник.</div>';
   } else {
-    const frag = document.createElement('div');
-    
+    const container = document.createElement('div');
+    container.className = 'results-flex';
+
     allHarmonicsList.forEach(item => {
       const h = item.harmonic;
       const overlaps = item.overlaps;
-      const isAboveMinFreq = item.isAboveMinFreq;
-      
-      const hdr = document.createElement('div');
-      hdr.className = 'mt-3 mb-2 p-2 bg-dark rounded';
-      hdr.innerHTML = `<strong class="text-warning">Гармоника #${h.n}</strong> 
-        <small class="text-muted">(${fmt(h.start)}–${fmt(h.end)} MHz)</small>`;
-      frag.appendChild(hdr);
 
-      if (!isAboveMinFreq) {
-        // Для гармоник ниже 1080 МГц
-        const belowMinMsg = document.createElement('div');
-        belowMinMsg.className = 'small text-muted ps-3 mb-2';
-        belowMinMsg.textContent = 'Нет пересечений с видеоканалами';
-        frag.appendChild(belowMinMsg);
+      const block = document.createElement('div');
+      block.className = 'harmonic-block';
+
+      block.innerHTML = `
+        <div class="harmonic-header">Гармоника #${h.n}
+          <small class="harmonic-content">(${fmt(h.start)}–${fmt(h.end)} MHz)</small>
+        </div>
+      `;
+
+      if (overlaps.length > 0) {
+        overlaps.sort((a, b) => a.freq - b.freq);
+        overlaps.forEach(ov => {
+          const row = document.createElement('span');
+          row.className = 'badge bg-danger me-1 mb-1';
+          row.textContent = `${ov.freq} MHz`;
+          block.appendChild(row);
+        });
       } else {
-        // Для гармоник выше 1080 МГц
-        if (overlaps.length > 0) {
-          // Сортируем каналы по частоте
-          overlaps.sort((a, b) => a.freq - b.freq);
-
-          // Выводим все каналы в один список
-          overlaps.forEach(ov => {
-            const row = document.createElement('div');
-            row.className = 'mb-1 ps-3';
-            row.innerHTML = `<span class="badge bg-danger me-2">${ov.freq} MHz</span>`;
-            frag.appendChild(row);
-          });
-        } else {
-          // Если пересечений нет, но гармоника выше 1080 МГц
-          const noOverlapMsg = document.createElement('div');
-          noOverlapMsg.className = 'small text-muted ps-3 mb-2';
-          noOverlapMsg.textContent = 'Нет пересечений с видеоканалами';
-          frag.appendChild(noOverlapMsg);
-        }
+        const noOverlapMsg = document.createElement('div');
+        noOverlapMsg.className = 'no-overlap';
+        noOverlapMsg.textContent = 'Нет пересечений с видеоканалами';
+        block.appendChild(noOverlapMsg);
       }
+
+      container.appendChild(block);
     });
-    
-    dirtyEl.appendChild(frag);
+
+    dirtyEl.appendChild(container);
   }
 
-  // вывод чистых каналов (только частоты выше 1080 МГц)
+  // ВЫВОД ЧИСТЫХ КАНАЛОВ (группировка в диапазоны)
   if (cleanList.length === 0) {
     cleanEl.innerHTML = '<div class="text-muted">Нет чистых каналов.</div>';
   } else {
     const frag2 = document.createElement('div');
+    frag2.className = 'clean-channels';
+
+    // Собираем все чистые частоты и сортируем
+    const allCleanFreqs = [];
+    cleanList.forEach(c => allCleanFreqs.push(c.freq));
+    allCleanFreqs.sort((a, b) => a - b);
+
+    // Группируем частоты в диапазоны
+    const ranges = [];
+    let currentRange = { start: allCleanFreqs[0], end: allCleanFreqs[0] };
     
-    // Собираем все чистые каналы в один список и сортируем по частоте
-    const allCleanChannels = [];
-    cleanList.forEach(c => {
-      allCleanChannels.push({ freq: c.freq });
+    for (let i = 1; i < allCleanFreqs.length; i++) {
+      // Если разница между текущей и предыдущей частотой <= 20 МГц - продолжаем диапазон
+      if (allCleanFreqs[i] - allCleanFreqs[i-1] <= 20) {
+        currentRange.end = allCleanFreqs[i];
+      } else {
+        // Разрыв больше 20 МГц - начинаем новый диапазон
+        ranges.push(currentRange);
+        currentRange = { start: allCleanFreqs[i], end: allCleanFreqs[i] };
+      }
+    }
+    ranges.push(currentRange); // Добавляем последний диапазон
+
+    // Выводим диапазоны
+    ranges.forEach(range => {
+      const rangeEl = document.createElement('div');
+      rangeEl.className = 'clean-range mb-2';
+      
+      if (range.start === range.end) {
+        // Если диапазон из одной частоты
+        rangeEl.innerHTML = `<span class="badge bg-success me-2">${range.start} MHz</span>`;
+      } else {
+        // Если диапазон из нескольких частот
+        rangeEl.innerHTML = `<span class="badge bg-success me-2">${range.start}–${range.end} MHz</span>`;
+      }
+      
+      frag2.appendChild(rangeEl);
     });
-    
-    allCleanChannels.sort((a, b) => a.freq - b.freq);
-    
-    // Выводим все чистые каналы
-    allCleanChannels.forEach(c => {
-      const el = document.createElement('span');
-      el.className = 'badge bg-success me-2 mb-2';
-      el.textContent = `${c.freq} MHz`;
-      frag2.appendChild(el);
-    });
-    
+
     cleanEl.appendChild(frag2);
   }
 
@@ -382,6 +394,7 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
     console.log('Bootstrap Tab error:', e);
   }
 }
+
 
 
 
