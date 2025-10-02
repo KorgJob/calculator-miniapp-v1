@@ -296,6 +296,48 @@ footer {
 }
 
 
+
+/* правки №2 */
+/* Стили для гармоник-форм */
+/* Контейнер */
+.freq-input-group {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Поле */
+.freq-input-group .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Суффикс */
+.freq-input-group .freq-suffix {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  background-color: #1e1e1e;
+  color: #bbb;
+  border: 1px solid #444;
+  border-left: none;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+}
+
+/* При фокусе на input — подсветка и у MHz */
+.freq-input-group:focus-within .form-control {
+  border-color: #f3b84b;
+}
+
+.freq-input-group:focus-within .freq-suffix {
+  border-color: #f3b84b;
+  color: #f3b84b;
+}
+
+
 /* Глассарий */
 
 
@@ -316,6 +358,7 @@ footer {
     margin-top: 15px;
   }
 }
+
 
 
 
