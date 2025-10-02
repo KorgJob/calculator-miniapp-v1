@@ -336,20 +336,57 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
     dirtyEl.appendChild(container);
   }
 
-  // ВЫВОД ЧИСТЫХ КАНАЛОВ (группировка в диапазоны)
+  // ВЫВОД ЧИСТЫХ ЧАСТОТ (разделение на Диапазоны и Каналы)
   if (cleanList.length === 0) {
-    cleanEl.innerHTML = '<div class="text-muted">Нет чистых каналов.</div>';
+    cleanEl.innerHTML = '<div class="text-muted">Нет чистых частот.</div>';
   } else {
-    const frag2 = document.createElement('div');
-    frag2.className = 'clean-channels';
+    const container = document.createElement('div');
+    container.className = 'clean-frequencies-container';
+    container.style.cssText = `
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 20px;
+      align-items: start;
+    `;
+
+    // Левый столбец - Диапазоны
+    const rangesColumn = document.createElement('div');
+    rangesColumn.className = 'ranges-column';
+    
+    const rangesTitle = document.createElement('div');
+    rangesTitle.className = 'column-title mb-2';
+    rangesTitle.innerHTML = '<strong>Диапазоны</strong>';
+    rangesTitle.style.cssText = 'color: #f3b84b; font-size: 0.9rem; text-align: center;';
+    rangesColumn.appendChild(rangesTitle);
+
+    // Правый столбец - Каналы
+    const channelsColumn = document.createElement('div');
+    channelsColumn.className = 'channels-column';
+    
+    const channelsTitle = document.createElement('div');
+    channelsTitle.className = 'column-title mb-2';
+    channelsTitle.innerHTML = '<strong>Каналы</strong>';
+    channelsTitle.style.cssText = 'color: #f3b84b; font-size: 0.9rem; text-align: center;';
+    channelsColumn.appendChild(channelsTitle);
+
+    // Разделительная линия
+    const divider = document.createElement('div');
+    divider.className = 'divider';
+    divider.style.cssText = `
+      width: 1px;
+      background: #444;
+      height: 100%;
+      margin: 0 10px;
+    `;
 
     // Собираем все чистые частоты и сортируем
     const allCleanFreqs = [];
     cleanList.forEach(c => allCleanFreqs.push(c.freq));
     allCleanFreqs.sort((a, b) => a - b);
 
-    // Группируем частоты в диапазоны
+    // Группируем частоты в диапазоны и отдельные каналы
     const ranges = [];
+    const singleChannels = [];
     let currentRange = { start: allCleanFreqs[0], end: allCleanFreqs[0] };
     
     for (let i = 1; i < allCleanFreqs.length; i++) {
@@ -358,29 +395,61 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
         currentRange.end = allCleanFreqs[i];
       } else {
         // Разрыв больше 20 МГц - начинаем новый диапазон
-        ranges.push(currentRange);
+        if (currentRange.start === currentRange.end) {
+          // Если диапазон из одной частоты - добавляем в каналы
+          singleChannels.push(currentRange.start);
+        } else {
+          // Если диапазон из нескольких частот - добавляем в диапазоны
+          ranges.push(currentRange);
+        }
         currentRange = { start: allCleanFreqs[i], end: allCleanFreqs[i] };
       }
     }
-    ranges.push(currentRange); // Добавляем последний диапазон
+    
+    // Обрабатываем последний диапазон
+    if (currentRange.start === currentRange.end) {
+      singleChannels.push(currentRange.start);
+    } else {
+      ranges.push(currentRange);
+    }
 
-    // Выводим диапазоны
+    // Заполняем столбец Диапазоны
     ranges.forEach(range => {
       const rangeEl = document.createElement('div');
-      rangeEl.className = 'clean-range mb-2';
-      
-      if (range.start === range.end) {
-        // Если диапазон из одной частоты
-        rangeEl.innerHTML = `<span class="badge bg-success me-2">${range.start} MHz</span>`;
-      } else {
-        // Если диапазон из нескольких частот
-        rangeEl.innerHTML = `<span class="badge bg-success me-2">${range.start}–${range.end} MHz</span>`;
-      }
-      
-      frag2.appendChild(rangeEl);
+      rangeEl.className = 'range-item mb-2';
+      rangeEl.innerHTML = `<span class="badge bg-success">${range.start}–${range.end} MHz</span>`;
+      rangesColumn.appendChild(rangeEl);
     });
 
-    cleanEl.appendChild(frag2);
+    // Заполняем столбец Каналы
+    singleChannels.forEach(channel => {
+      const channelEl = document.createElement('div');
+      channelEl.className = 'channel-item mb-2';
+      channelEl.innerHTML = `<span class="badge bg-success">${channel} MHz</span>`;
+      channelsColumn.appendChild(channelEl);
+    });
+
+    // Если в одном из столбцов нет данных - показываем сообщение
+    if (ranges.length === 0) {
+      const noRangesMsg = document.createElement('div');
+      noRangesMsg.className = 'text-muted small';
+      noRangesMsg.textContent = 'Нет диапазонов';
+      rangesColumn.appendChild(noRangesMsg);
+    }
+
+    if (singleChannels.length === 0) {
+      const noChannelsMsg = document.createElement('div');
+      noChannelsMsg.className = 'text-muted small';
+      noChannelsMsg.textContent = 'Нет каналов';
+      channelsColumn.appendChild(noChannelsMsg);
+    }
+
+    // Собираем контейнер
+    container.appendChild(rangesColumn);
+    container.appendChild(divider);
+    container.appendChild(channelsColumn);
+
+    cleanEl.appendChild(container);
   }
 
   // переключаем вкладку
@@ -394,6 +463,7 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
     console.log('Bootstrap Tab error:', e);
   }
 }
+
 
 
 
