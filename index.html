@@ -134,23 +134,35 @@
                          
                         <form class="row g-3" onsubmit="event.preventDefault(); calculateHarmonics();">
   <div class="col-6">
-    <label for="start_freq" class="form-label text-harmonic-forms">Начальная частота (MHz)</label>
-    <input type="number" step="0.001" id="start_freq" class="form-control bg-dark text-white border-secondary">
+    <label for="start_freq" class="form-label text-harmonic-forms">Начальная частота</label>
+    <div class="freq-input-group">
+      <input type="number" step="0.001" id="start_freq" class="form-control bg-dark text-white border-secondary">
+      <span class="freq-suffix">MHz</span>
+    </div>
   </div>
 
   <div class="col-6">
-    <label for="end_freq" class="form-label text-harmonic-forms">Конечная частота (MHz)</label>
-    <input type="number" step="0.001" id="end_freq" class="form-control bg-dark text-white border-secondary">
+    <label for="end_freq" class="form-label text-harmonic-forms">Конечная частота</label>
+    <div class="freq-input-group">
+      <input type="number" step="0.001" id="end_freq" class="form-control bg-dark text-white border-secondary">
+      <span class="freq-suffix">MHz</span>
+    </div>
   </div>
 
   <div class="col-6">
-    <label for="center_freq" class="form-label text-harmonic-forms">Центральная частота (MHz)</label>
-    <input type="number" step="0.001" id="center_freq" class="form-control bg-dark text-white border-secondary" value="433">
+    <label for="center_freq" class="form-label text-harmonic-forms">Центральная частота</label>
+    <div class="freq-input-group">
+      <input type="number" step="0.001" id="center_freq" class="form-control bg-dark text-white border-secondary" value="433">
+      <span class="freq-suffix">MHz</span>
+    </div>
   </div>
 
   <div class="col-6">
-    <label for="bandwidth" class="form-label text-harmonic-forms">Ширина канала (MHz)</label>
-    <input type="number" step="0.1" id="bandwidth" class="form-control bg-dark text-white border-secondary" value="10">
+    <label for="bandwidth" class="form-label text-harmonic-forms">Ширина канала</label>
+    <div class="freq-input-group">
+      <input type="number" step="0.1" id="bandwidth" class="form-control bg-dark text-white border-secondary" value="10">
+      <span class="freq-suffix">MHz</span>
+    </div>
   </div>
 
   <div class="col-12">
@@ -228,6 +240,7 @@
     <script src="mdb.umd.min.js"></script>
 </body>
 </html>
+
 
 
 
