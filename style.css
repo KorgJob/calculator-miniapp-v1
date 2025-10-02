@@ -197,8 +197,67 @@ footer {
   border-bottom: 2px solid #f3b84b !important;
 }
 
+/* Контейнер для списка (гармоники и чистые каналы) */
+.results-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Блок гармоники */
+.harmonic-block {
+  flex: 1 1 calc(50% - 8px); /* два блока в строку, если место позволяет */
+  min-width: 250px; /* минимальная ширина */
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #fff;
+}
+
+/* Заголовок гармоники */
+.harmonic-header {
+  font-weight: bold;
+  color: #f3b84b;
+  margin-bottom: 4px;
+}
+
+/* Перечисление каналов */
+.harmonic-block .badge {
+  font-size: 0.85rem;
+}
+
+/* Подпись про отсутствие пересечений */
+.no-overlap {
+  font-size: 0.85rem;
+  color: #bbb;
+}
+
+/* Чистые каналы — аналогично */
+.clean-channels {
+  display: flex;
+  flex-wrap: wrap;
+  
+}
+.clean-channels .badge {
+  background: #198754;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+}
+
+.harmonic-content {
+  color: #ffffff;
+}
+
+.text-harmonic-forms {
+  font-size: 12.8px;
+}
 
 
+
+
+
+/* Глассарий */
 
 
 /* Mobile */
