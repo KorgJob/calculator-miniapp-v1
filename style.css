@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    border-radius: 0 !important;
 }
 
 body {
@@ -210,7 +211,6 @@ footer {
   min-width: 250px; /* минимальная ширина */
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid #444;
-  border-radius: 6px;
   padding: 8px 12px;
   color: #fff;
 }
@@ -248,7 +248,6 @@ footer {
 .harmonic-content {
   color: #ffffff;
 }
-
 
 
 /* правки */
@@ -293,7 +292,6 @@ footer {
 }
 
 
-
 /* правки №2 */
 /* Стили для гармоник-форм */
 /* Контейнер */
@@ -335,6 +333,8 @@ footer {
 }
 
 
+
+
 /* Глассарий */
 
 
@@ -354,9 +354,17 @@ footer {
   .accordion_section {
     margin-top: 15px;
   }
+
+
 }
 
-
-
-
-
+@media (max-width: 420px) {
+  label[for="center_freq"]::after {
+    content: "Центр. част."; 
+    display: block;
+    font-size: 1rem;
+  }
+  label[for="center_freq"] {
+    font-size: 0; 
+  }
+}
