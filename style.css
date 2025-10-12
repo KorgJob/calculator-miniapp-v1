@@ -338,6 +338,164 @@ footer {
 /* Глассарий */
 
 
+
+/* 3 калькулятор */
+/* Стили для калькулятора фильтров - МОБИЛЬНАЯ ВЕРСИЯ */
+.filter-calculator {
+    position: relative;
+    z-index: 10;
+}
+
+/* Легенда для мобильных */
+.filter-legend-mobile {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(243, 184, 75, 0.1);
+    border: 1px solid rgba(243, 184, 75, 0.3);
+    border-radius: 8px;
+}
+
+.filter-legend-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: #f3b84b;
+}
+
+.filter-dot {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.filter-dot-gold {
+    background: #f3b84b;
+    box-shadow: 0 0 8px rgba(243, 184, 75, 0.5);
+}
+
+.filter-dot-teal {
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.filter-dot-danger {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+/* Кнопки для мобильных */
+.filter-btns-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+/* Карточки графиков */
+.filter-charts-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.filter-chart-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #444;
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.filter-chart-header {
+    background: rgba(243, 184, 75, 0.15);
+    padding: 12px 15px;
+    font-weight: 600;
+    color: #f3b84b;
+    border-bottom: 1px solid rgba(243, 184, 75, 0.3);
+    font-size: 0.9rem;
+}
+
+.filter-chart {
+    height: 280px;
+    width: 100%;
+    padding: 10px;
+}
+
+/* Рекомендации */
+.filter-recommendation {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.filter-recommendation b {
+    color: #f3b84b;
+}
+
+/* Адаптивность для планшетов и десктопов */
+@media (min-width: 768px) {
+    .filter-legend-mobile {
+        justify-content: center;
+        gap: 30px;
+    }
+    
+    .filter-legend-item {
+        flex-direction: row;
+        font-size: 0.85rem;
+    }
+    
+    .filter-btns-mobile {
+        flex-direction: row;
+    }
+    
+    .filter-btns-mobile .btn {
+        flex: 1;
+    }
+    
+    .filter-charts-mobile {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .filter-chart {
+        height: 320px;
+    }
+}
+
+/* Переопределение стилей Plotly под золотую тему */
+.filter-calculator .js-plotly-plot .plotly .modebar {
+    background: rgba(28, 27, 25, 0.95) !important;
+    border: 1px solid #444 !important;
+    border-radius: 4px !important;
+}
+
+.filter-calculator .js-plotly-plot .plotly .modebar-btn {
+    color: #bbb !important;
+}
+
+.filter-calculator .js-plotly-plot .plotly .modebar-btn:hover {
+    background: rgba(243, 184, 75, 0.3) !important;
+    color: #f3b84b !important;
+}
+
+.filter-calculator .js-plotly-plot .plotly .modebar-btn.active .icon path {
+    fill: #f3b84b !important;
+}
+
+
 /* Mobile */
 @media (min-width: 350px) and (max-width: 430px) {
     .logotip_block {
@@ -368,3 +526,4 @@ footer {
     font-size: 0; 
   }
 }
+
