@@ -467,4 +467,403 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
 
 
 
+// 3 calculate
+// 3
+// Калькулятор фильтров - изолированный объект с золотой цветовой схемой
+const filterCalculator = {
+    /* === константы === */
+    BW_FIXED: 20,     // полоса 20 МГц
+    FMAX_MHZ: 7500,   // считаем гармоники до 7.5 ГГц
+    Y_MIN: -60,       // низ графика в дБ
+
+    /* === Таблицы фильтров === */
+    BPF_TABLE: [
+        { fc: 1056, bw: 30 }, { fc: 1128, bw: 34 }, { fc: 1150, bw: 32 }, { fc: 1200, bw: 40 },
+        { fc: 1250, bw: 36 }, { fc: 1315, bw: 30 }, { fc: 1370, bw: 40 }, { fc: 1447, bw: 30 },
+        { fc: 1500, bw: 40 }, { fc: 999, bw: 40 }
+    ],
+    BPF_WIDE: [
+        { f1: 3100, f2: 3400, label: '3.1–3.4 ГГц' },
+        { f1: 3700, f2: 4500, label: '3.7–4.5 ГГц' },
+        { f1: 4900, f2: 6000, label: '4.9–6.0 ГГц' }
+    ],
+    LPF_TX_RECO: [
+        { name: 'ФНЧ200', cut: 200 }, { name: 'ФНЧ300', cut: 300 }, { name: 'ФНЧ400', cut: 400 },
+        { name: 'ФНЧ500', cut: 500 }, { name: 'ФНЧ600', cut: 600 }, { name: 'ФНЧ800', cut: 800 },
+        { name: 'ФНЧ1000', cut: 1000 }, { name: 'ФНЧ1400', cut: 1400 }, { name: 'ФНЧ3500', cut: 3500 }
+    ],
+    HPF_RX_RECO: [
+        { name: 'ФВЧ1000', cut: 1000, forCenter: 1200 },
+        { name: 'ФВЧ1200', cut: 1200, forCenter: 1500 },
+        { name: 'ФВЧ3100', cut: 3100, forCenter: 3300 },
+        { name: 'ФВЧ4500', cut: 4500, forCenter: 4900 },
+        { name: 'ФВЧ5500', cut: 5500, forCenter: 5800 }
+    ],
+
+    /* === Помощники === */
+    $(id) { return document.getElementById(id); },
+    db(x) { if (x < 1e-6) x = 1e-6; return 20 * Math.log10(x); },
+    overlap(a1, a2, b1, b2) { 
+        const x0 = Math.max(a1, b1), x1 = Math.min(a2, b2); 
+        return (x1 > x0) ? [x0, x1] : null; 
+    },
+
+    /* === Генерация спектра === */
+    makeSpectrum(f0) {
+        const arr = [];
+        if (!f0 || f0 <= 0) return arr;
+        const hmax = Math.floor(this.FMAX_MHZ / f0);
+        
+        for (let n = 1; n <= hmax; n++) {
+            const fc = f0 * n;
+            const bw = this.BW_FIXED * n;
+            const amp = 1 / Math.pow(n, 1.25);
+            arr.push({ n: n, fc: fc, f1: fc - bw / 2, f2: fc + bw / 2, amp: amp });
+        }
+        return arr;
+    },
+
+    /* === Подбор фильтров === */
+    pickBestLPF(f0) {
+        const need = f0 + this.BW_FIXED / 2;
+        let best = this.LPF_TX_RECO[this.LPF_TX_RECO.length - 1];
+        for (let i = 0; i < this.LPF_TX_RECO.length; i++) {
+            if (this.LPF_TX_RECO[i].cut >= need) { 
+                best = this.LPF_TX_RECO[i]; 
+                break; 
+            }
+        }
+        return best;
+    },
+
+    pickBPFforVideo(f) {
+        let best = null, dBest = 1e9;
+        
+        // Поиск в таблице ППФ
+        for (let i = 0; i < this.BPF_TABLE.length; i++) {
+            const x = this.BPF_TABLE[i];
+            const vL = f - this.BW_FIXED / 2, vR = f + this.BW_FIXED / 2;
+            const bL = x.fc - x.bw / 2, bR = x.fc + x.bw / 2;
+            const ov = this.overlap(vL, vR, bL, bR);
+            if (ov) {
+                const d = Math.abs(f - x.fc);
+                if (d < dBest) { 
+                    dBest = d; 
+                    best = { type: 'bpf', f1: bL, f2: bR, label: 'ППФ ' + x.fc + '/' + x.bw + ' МГц' }; 
+                }
+            }
+        }
+        if (best) return best;
+        
+        // Поиск в широкополосных ППФ
+        for (let i = 0; i < this.BPF_WIDE.length; i++) {
+            const r = this.BPF_WIDE[i];
+            if (f >= r.f1 && f <= r.f2) {
+                return { type: 'bpf', f1: r.f1, f2: r.f2, label: 'ППФ ' + r.label };
+            }
+        }
+        
+        // Если ППФ не найден - используем ФНЧ
+        const lpf = this.pickBestLPF(f);
+        return { type: 'lpf', fc: lpf.cut, label: lpf.name + ' (срез ~' + lpf.cut + ' МГц)' };
+    },
+
+    pickHPFforRX(f) {
+        let best = this.HPF_RX_RECO[0];
+        let dBest = Math.abs(f - best.forCenter);
+        
+        for (let i = 1; i < this.HPF_RX_RECO.length; i++) {
+            const d = Math.abs(f - this.HPF_RX_RECO[i].forCenter);
+            if (d < dBest) { 
+                dBest = d; 
+                best = this.HPF_RX_RECO[i]; 
+            }
+        }
+        return best;
+    },
+
+    /* === Визуализация с золотой цветовой схемой === */
+    bandTrace(name, f1, f2, levelDb, color, alpha = 0.25) {
+        return {
+            x: [f1, f1, f2, f2], 
+            y: [this.Y_MIN, levelDb, levelDb, this.Y_MIN],
+            type: 'scatter', 
+            mode: 'lines', 
+            fill: 'toself',
+            line: { 
+                color: color, 
+                width: 1,
+                dash: levelDb < -20 ? 'dot' : 'solid'
+            }, 
+            fillcolor: color.replace('1)', alpha + ')'),
+            name: name,
+            hovertemplate: name + '<br>%{x:.0f} МГц<br>' + levelDb.toFixed(1) + ' дБ<extra></extra>'
+        };
+    },
+
+    conflictTrace(f1, f2) {
+        return {
+            x: [f1, f1, f2, f2], 
+            y: [this.Y_MIN, 0, 0, this.Y_MIN],
+            type: 'scatter', 
+            mode: 'lines', 
+            fill: 'toself',
+            line: { color: 'rgba(239,68,68,1)', width: 0 },
+            fillcolor: 'rgba(239,68,68,0.35)',
+            name: '⚠ конфликт',
+            hovertemplate: '⚠ конфликт<br>%{x:.0f}–%{x:.0f} МГц<extra></extra>'
+        };
+    },
+
+    layout(title, xmax) {
+        return {
+            title: { 
+                text: title, 
+                font: { 
+                    size: 16, 
+                    color: '#f3b84b',
+                    family: 'Arial, sans-serif'
+                },
+                x: 0.05
+            },
+            margin: { l: 60, r: 30, b: 50, t: 50 },
+            paper_bgcolor: 'rgba(28, 27, 25, 0.9)',
+            plot_bgcolor: 'rgba(28, 27, 25, 0.9)',
+            xaxis: { 
+                title: {
+                    text: 'Частота, МГц',
+                    font: { color: '#f3b84b', size: 12 }
+                }, 
+                range: [0, xmax], 
+                gridcolor: 'rgba(243, 184, 75, 0.2)', 
+                zerolinecolor: 'rgba(243, 184, 75, 0.3)',
+                tickfont: { color: '#ccc', size: 10 },
+                color: '#fff',
+                showline: true,
+                linecolor: 'rgba(243, 184, 75, 0.3)'
+            },
+            yaxis: { 
+                title: {
+                    text: 'Уровень, дБ',
+                    font: { color: '#f3b84b', size: 12 }
+                }, 
+                range: [this.Y_MIN, 0], 
+                gridcolor: 'rgba(243, 184, 75, 0.2)', 
+                zerolinecolor: 'rgba(243, 184, 75, 0.3)',
+                tickfont: { color: '#ccc', size: 10 },
+                color: '#fff',
+                showline: true,
+                linecolor: 'rgba(243, 184, 75, 0.3)'
+            },
+            legend: { 
+                orientation: 'h', 
+                yanchor: 'top', 
+                y: -0.2, 
+                xanchor: 'center',
+                x: 0.5,
+                font: { color: '#ccc', size: 10 },
+                bgcolor: 'rgba(28, 27, 25, 0.8)',
+                bordercolor: 'rgba(243, 184, 75, 0.3)',
+                borderwidth: 1
+            },
+            font: { color: '#fff', family: 'Arial, sans-serif' },
+            hoverlabel: {
+                bgcolor: 'rgba(28, 27, 25, 0.9)',
+                bordercolor: '#f3b84b',
+                font: { color: '#fff' }
+            }
+        };
+    },
+
+    /* === Основная функция === */
+    run() {
+        // Проверка загрузки Plotly
+        if (typeof Plotly === 'undefined') {
+            console.error('Plotly не загружен!');
+            this.$('filter_reco').innerHTML = 'Ошибка: библиотека графиков не загружена';
+            return;
+        }
+
+        const fVideo = +this.$('filter_fVideo').value;
+        const fCtrl = +this.$('filter_fCtrl').value;
+        const xmax = +this.$('filter_xspan').value;
+
+        // Валидация ввода
+        if (isNaN(fVideo) || isNaN(fCtrl) || fVideo <= 0 || fCtrl <= 0) {
+            this.$('filter_reco').innerHTML = '<span style="color: #ef4444;">Ошибка: введите корректные частоты</span>';
+            return;
+        }
+
+        // Генерация спектров
+        const vPeaks = this.makeSpectrum(fVideo);
+        const cPeaks = this.makeSpectrum(fCtrl);
+
+        // ---------- ДО ФИЛЬТРА ----------
+        const before = [];
+        const conflBefore = [];
+
+        // Видео гармоники - золотой цвет
+        vPeaks.forEach(p => {
+            const name = p.n + '× видео • ' + Math.round(p.fc) + ' МГц';
+            const alpha = Math.max(0.15, Math.min(0.4, 0.3 / p.n + 0.1));
+            before.push(this.bandTrace(name, p.f1, p.f2, this.db(p.amp), 'rgba(243, 184, 75, 1)', alpha));
+        });
+
+        // Управление гармоники - бирюзовый цвет
+        cPeaks.forEach(p => {
+            const name = p.n + '× упр. • ' + Math.round(p.fc) + ' МГц';
+            const alpha = Math.max(0.15, Math.min(0.4, 0.3 / p.n + 0.1));
+            before.push(this.bandTrace(name, p.f1, p.f2, this.db(p.amp), 'rgba(16, 185, 129, 1)', alpha));
+        });
+
+        // Конфликты до фильтра
+        if (vPeaks.length) {
+            const vFund = vPeaks[0];
+            cPeaks.forEach(p => {
+                const ov = this.overlap(p.f1, p.f2, vFund.f1, vFund.f2);
+                if (ov) conflBefore.push(this.conflictTrace(ov[0], ov[1]));
+            });
+        }
+
+        // Отрисовка графика "До фильтра"
+        Plotly.newPlot('filter_chartBefore', before.concat(conflBefore), this.layout('До фильтра', xmax), { 
+            displayModeBar: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+            responsive: true
+        });
+
+        // ---------- ПОДБОР ФИЛЬТРОВ ----------
+        const filtVideo = this.pickBPFforVideo(fVideo);
+        const filtCtrl = this.pickBestLPF(fCtrl);
+        const hpfRx = this.pickHPFforRX(fVideo);
+
+        // ---------- ПОСЛЕ ФИЛЬТРА ----------
+        const after = [];
+        const conflAfter = [];
+
+        // Области пропускания фильтров
+        if (filtVideo.type === 'bpf') {
+            after.push(this.bandTrace(filtVideo.label, filtVideo.f1, filtVideo.f2, 0, 'rgba(243, 184, 75, 1)', 0.15));
+        } else {
+            after.push(this.bandTrace(filtVideo.label, 0, filtVideo.fc, 0, 'rgba(243, 184, 75, 1)', 0.15));
+        }
+        
+        after.push(this.bandTrace(hpfRx.name + ' (RX)', hpfRx.cut, xmax, 0, 'rgba(243, 184, 75, 1)', 0.1));
+        after.push(this.bandTrace(filtCtrl.name, 0, filtCtrl.cut, 0, 'rgba(16, 185, 129, 1)', 0.15));
+
+        // Передаточные функции фильтров
+        const gVideoTx = (f) => {
+            if (filtVideo.type === 'bpf') {
+                return (f >= filtVideo.f1 && f <= filtVideo.f2) ? 1 : 0;
+            } else {
+                return (f <= filtVideo.fc) ? 1 : 0;
+            }
+        };
+
+        const gVideo = (f) => gVideoTx(f) * (f >= hpfRx.cut ? 1 : 0);
+        const gCtrl = (f) => (f <= filtCtrl.cut) ? 1 : 0;
+
+        // Видео после фильтра
+        vPeaks.forEach(p => {
+            const g = Math.max(gVideo(p.f1), gVideo((p.f1 + p.f2) / 2), gVideo(p.f2));
+            if (g > 0) {
+                const name = p.n + '× видео • ' + Math.round(p.fc) + ' МГц';
+                after.push(this.bandTrace(name, p.f1, p.f2, this.db(p.amp * g), 'rgba(243, 184, 75, 1)', 0.25));
+            }
+        });
+
+        // Полоса приёма видео для конфликтов
+        const vPass = (filtVideo.type === 'bpf') ? [filtVideo.f1, filtVideo.f2] : [0, filtVideo.fc];
+        const vPassWithRx = this.overlap(vPass[0], vPass[1], hpfRx.cut, xmax);
+
+        // Управление после фильтра и конфликты
+        cPeaks.forEach(p => {
+            const g = Math.max(gCtrl(p.f1), gCtrl((p.f1 + p.f2) / 2), gCtrl(p.f2));
+            if (g > 0) {
+                const name = p.n + '× упр. • ' + Math.round(p.fc) + ' МГц';
+                after.push(this.bandTrace(name, p.f1, p.f2, this.db(p.amp * g), 'rgba(16, 185, 129, 1)', 0.25));
+                
+                if (vPassWithRx) {
+                    const ov = this.overlap(p.f1, p.f2, vPassWithRx[0], vPassWithRx[1]);
+                    if (ov) conflAfter.push(this.conflictTrace(ov[0], ov[1]));
+                }
+            }
+        });
+
+        // Отрисовка графика "После фильтра"
+        Plotly.newPlot('filter_chartAfter', after.concat(conflAfter), this.layout('После фильтра', xmax), { 
+            displayModeBar: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+            responsive: true
+        });
+
+        // ---------- Текстовые рекомендации ----------
+        let txt = '';
+        txt += '<div class="mb-2"><i class="fas fa-tv me-2"></i><b>Видео-TX:</b> ' + filtVideo.label + '</div>';
+        txt += '<div class="mb-2"><i class="fas fa-satellite-dish me-2"></i><b>Видео-RX:</b> ' + hpfRx.name + ' (срез ≈ ' + hpfRx.cut + ' МГц)</div>';
+        txt += '<div class="mb-2"><i class="fas fa-gamepad me-2"></i><b>Управление-TX:</b> ' + filtCtrl.name + ' (срез ≈ ' + filtCtrl.cut + ' МГц)</div>';
+        
+        // Статус конфликтов
+        const conflictStatus = conflAfter.length === 0 ? 
+            '<span style="color: #10b981;"><i class="fas fa-check-circle me-1"></i>Конфликты устранены</span>' :
+            '<span style="color: #ef4444;"><i class="fas fa-exclamation-triangle me-1"></i>Осталось конфликтов: ' + conflAfter.length + '</span>';
+        
+        txt += '<div class="mt-3">' + conflictStatus + '</div>';
+        
+        this.$('filter_reco').innerHTML = txt;
+    },
+
+    /* === Сброс === */
+    clear() {
+        this.$('filter_fVideo').value = 1200;
+        this.$('filter_fCtrl').value = 868;
+        this.$('filter_xspan').value = 7500;
+        this.$('filter_reco').innerHTML = '';
+        
+        // Очистка графиков
+        Plotly.purge('filter_chartBefore');
+        Plotly.purge('filter_chartAfter');
+        
+        // Показ сообщения о сбросе
+        this.$('filter_reco').innerHTML = '<div style="color: #f3b84b;"><i class="fas fa-info-circle me-2"></i>Параметры сброшены. Введите новые значения и нажмите "Подобрать фильтр"</div>';
+    },
+
+    /* === Инициализация === */
+    init() {
+        // Автоматический запуск при загрузке
+        setTimeout(() => {
+            if (this.$('filter_fVideo') && this.$('filter_fCtrl')) {
+                this.run();
+            }
+        }, 1500);
+        
+        // Обработчики для реального времени (опционально)
+        this.$('filter_fVideo').addEventListener('change', () => this.run());
+        this.$('filter_fCtrl').addEventListener('change', () => this.run());
+        this.$('filter_xspan').addEventListener('change', () => this.run());
+    }
+};
+
+// Инициализация после загрузки страницы
+document.addEventListener('DOMContentLoaded', function() {
+    filterCalculator.init();
+});
+
+// Также инициализируем при открытии аккордеона (для Bootstrap 5)
+document.addEventListener('DOMContentLoaded', function() {
+    const filterAccordion = document.getElementById('collapseThree');
+    if (filterAccordion) {
+        filterAccordion.addEventListener('shown.bs.collapse', function() {
+            // Перерисовываем графики когда аккордеон открывается
+            setTimeout(() => {
+                if (typeof Plotly !== 'undefined' && filterCalculator.$('filter_fVideo')) {
+                    Plotly.Plots.resize('filter_chartBefore');
+                    Plotly.Plots.resize('filter_chartAfter');
+                }
+            }, 300);
+        });
+    }
+});
 
