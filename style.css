@@ -166,6 +166,24 @@ footer {
   font-style: italic;
 }
 
+/* Стили для валидации 1 калькулятора -- корректировки */
+/* Стили для валидации */
+.is-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25) !important;
+}
+
+.field-error {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    color: #ef4444 !important;
+}
+
+.input-group-text {
+    min-width: 60px;
+    justify-content: center;
+}
+/* ENd Стили для валидации 1 калькулятора -- корректировки */
 
 /* Стили табов под твой дизайн */
 /* Таб-контейнер */
@@ -526,4 +544,5 @@ footer {
     font-size: 0; 
   }
 }
+
 
