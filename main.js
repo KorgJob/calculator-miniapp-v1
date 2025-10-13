@@ -8,51 +8,189 @@ function wToDbm(watt) {
   return 10 * Math.log10(watt) + 30;
 }
 
-// Синхронизация полей
-document.getElementById('p_tx_dbm').addEventListener('input', () => {
-  const dbm = parseFloat(document.getElementById('p_tx_dbm').value);
+// Валидация целых чисел для усиления антенн
+function validateIntegerInput(value, fieldName) {
+    if (value === '' || isNaN(value)) {
+        return { isValid: false, message: `Введите числовое значение для ${fieldName}` };
+    }
+    
+    const numValue = parseFloat(value);
+    
+    // Проверяем что число целое
+    if (!Number.isInteger(numValue)) {
+        const nearestInt = Math.round(numValue);
+        return { 
+            isValid: false, 
+            message: `Для ${fieldName} разрешены только целые числа. Используйте ${nearestInt} вместо ${value}`,
+            nearestValue: nearestInt
+        };
+    }
+    
+    return { isValid: true, value: numValue };
+}
+
+// Синхронизация полей мощности
+document.getElementById('p_tx_dbm').addEventListener('input', function() {
+  const dbm = parseFloat(this.value);
   if (!isNaN(dbm)) {
     document.getElementById('p_tx_w').value = dbmToW(dbm).toFixed(3);
   }
 });
 
-document.getElementById('p_tx_w').addEventListener('input', () => {
-  const watt = parseFloat(document.getElementById('p_tx_w').value);
+document.getElementById('p_tx_w').addEventListener('input', function() {
+  const watt = parseFloat(this.value);
   if (!isNaN(watt) && watt > 0) {
     document.getElementById('p_tx_dbm').value = wToDbm(watt).toFixed(1);
   }
 });
 
-
-function calculate() {
-  const R = 6371000; 
-
-  const f = parseFloat(document.getElementById('freq').value);
-  const h_tx = parseFloat(document.getElementById('h_tx').value);
-  const h_rx = parseFloat(document.getElementById('h_rx').value);
-  const p_tx = parseFloat(document.getElementById('p_tx_dbm').value); // берем дБм
-  const g_tx = parseFloat(document.getElementById('g_tx').value);
-  const g_rx = parseFloat(document.getElementById('g_rx').value);
-  const sensitivity = parseFloat(document.getElementById('sensitivity').value);
-  const loss_other = parseFloat(document.getElementById('loss_other').value);
-
-  
-  const d_horizon = (Math.sqrt(2 * R * h_tx) + Math.sqrt(2 * R * h_rx)) / 1000;
-
-  
-  const ML = p_tx + g_tx + g_rx - sensitivity - loss_other; 
-  const log_d = (ML - 32.44 - 20 * Math.log10(f)) / 20;
-  const d_energy = Math.pow(10, log_d); 
-
-  // Максимальная дальность
-  const d_max = Math.min(d_horizon, d_energy);
-
-  document.getElementById('result').innerHTML = `
-    Радиогоризонт: ${d_horizon.toFixed(2)} км <br>
-    Энергетическая дальность: ${d_energy.toFixed(2)} км <br>
-    <span style="color: #f3b84b;">Максимальная дальность: ${d_max.toFixed(2)} км</span>
-  `;
+// Функция для показа ошибки
+function showError(field, message) {
+    // Убираем старую ошибку
+    hideError(field);
+    
+    // Добавляем класс ошибки к полю
+    field.classList.add('is-invalid');
+    
+    // Создаем элемент с ошибкой
+    const errorElement = document.createElement('div');
+    errorElement.className = 'invalid-feedback d-block';
+    errorElement.textContent = message;
+    errorElement.style.color = '#ef4444';
+    errorElement.style.fontSize = '0.8rem';
+    
+    // Вставляем ошибку после поля
+    field.parentNode.appendChild(errorElement);
 }
+
+// Функция для скрытия ошибки
+function hideError(field) {
+    field.classList.remove('is-invalid');
+    const existingError = field.parentNode.querySelector('.invalid-feedback');
+    if (existingError) {
+        existingError.remove();
+    }
+}
+
+// Валидация полей усиления при изменении
+document.getElementById('g_tx').addEventListener('input', function() {
+    const validation = validateIntegerInput(this.value, 'усиления передатчика');
+    if (!validation.isValid) {
+        showError(this, validation.message);
+        // Автокоррекция
+        if (validation.nearestValue !== undefined) {
+            setTimeout(() => {
+                this.value = validation.nearestValue;
+                hideError(this);
+            }, 1500);
+        }
+    } else {
+        hideError(this);
+    }
+});
+
+document.getElementById('g_rx').addEventListener('input', function() {
+    const validation = validateIntegerInput(this.value, 'усиления приемника');
+    if (!validation.isValid) {
+        showError(this, validation.message);
+        // Автокоррекция
+        if (validation.nearestValue !== undefined) {
+            setTimeout(() => {
+                this.value = validation.nearestValue;
+                hideError(this);
+            }, 1500);
+        }
+    } else {
+        hideError(this);
+    }
+});
+
+// Основная функция расчета
+function calculate() {
+    const R = 6371000; 
+
+    // Получаем значения
+    const f = parseFloat(document.getElementById('freq').value);
+    const h_tx = parseFloat(document.getElementById('h_tx').value);
+    const h_rx = parseFloat(document.getElementById('h_rx').value);
+    const p_tx = parseFloat(document.getElementById('p_tx_dbm').value);
+    const sensitivity = parseFloat(document.getElementById('sensitivity').value);
+    const loss_other = parseFloat(document.getElementById('loss_other').value);
+    
+    // Валидируем усиление антенн
+    const g_tx_validation = validateIntegerInput(document.getElementById('g_tx').value, 'усиления передатчика');
+    const g_rx_validation = validateIntegerInput(document.getElementById('g_rx').value, 'усиления приемника');
+    
+    // Сбрасываем все ошибки
+    hideError(document.getElementById('g_tx'));
+    hideError(document.getElementById('g_rx'));
+    
+    // Проверяем ошибки валидации
+    let hasErrors = false;
+    let errorMessage = '';
+    
+    if (!g_tx_validation.isValid) {
+        showError(document.getElementById('g_tx'), g_tx_validation.message);
+        errorMessage += `• ${g_tx_validation.message}<br>`;
+        hasErrors = true;
+    }
+    
+    if (!g_rx_validation.isValid) {
+        showError(document.getElementById('g_rx'), g_rx_validation.message);
+        errorMessage += `• ${g_rx_validation.message}<br>`;
+        hasErrors = true;
+    }
+    
+    if (hasErrors) {
+        document.getElementById('result').innerHTML = `<span style="color: #ef4444;">${errorMessage}</span>`;
+        return;
+    }
+    
+    const g_tx = g_tx_validation.value;
+    const g_rx = g_rx_validation.value;
+    
+    // Проверяем остальные поля
+    if (isNaN(f) || isNaN(h_tx) || isNaN(h_rx) || isNaN(p_tx) || isNaN(sensitivity) || isNaN(loss_other)) {
+        document.getElementById('result').innerHTML = '<span style="color: #ef4444;">Заполните все поля корректными числовыми значениями</span>';
+        return;
+    }
+    
+    // Проверяем положительные значения
+    if (f <= 0 || h_tx <= 0 || h_rx <= 0) {
+        document.getElementById('result').innerHTML = '<span style="color: #ef4444;">Частота и высоты должны быть положительными числами</span>';
+        return;
+    }
+
+    // Расчет радиогоризонта
+    const d_horizon = (Math.sqrt(2 * R * h_tx) + Math.sqrt(2 * R * h_rx)) / 1000;
+
+    // Расчет энергетической дальности
+    const ML = p_tx + g_tx + g_rx - sensitivity - loss_other; 
+    const log_d = (ML - 32.44 - 20 * Math.log10(f)) / 20;
+    const d_energy = Math.pow(10, log_d); 
+
+    // Максимальная дальность
+    const d_max = Math.min(d_horizon, d_energy);
+
+    document.getElementById('result').innerHTML = `
+        <div class="mb-2"><strong>Радиогоризонт:</strong> ${d_horizon.toFixed(2)} км</div>
+        <div class="mb-2"><strong>Энергетическая дальность:</strong> ${d_energy.toFixed(2)} км</div>
+        <div class="mb-2" style="color: #f3b84b;"><strong>Максимальная дальность:</strong> ${d_max.toFixed(2)} км</div>
+    `;
+}
+
+// Добавляем CSS для ошибок
+const style = document.createElement('style');
+style.textContent = `
+    .is-invalid {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25) !important;
+    }
+    .invalid-feedback {
+        display: block !important;
+    }
+`;
+document.head.appendChild(style);
 
 
 // Калькулятор гармоник
@@ -866,4 +1004,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
 
