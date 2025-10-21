@@ -226,87 +226,73 @@
                     
 
                         <!-- начало -->
-          <div class="accordion-body text-white">
-    <div class="filter-calculator">
-        <!-- Параметры ввода -->
-        <form class="row g-3" onsubmit="event.preventDefault(); filterCalculator.run();">
-            <div class="col-12 col-md-6">
-                <label class="form-label text-harmonic-forms">Видеопередатчик (МГц)</label>
-                <div class="freq-input-group">
-                    <input type="number" id="filter_fVideo" class="form-control bg-dark text-white border-secondary" value="1200">
-                    <span class="freq-suffix">MHz</span>
-                </div>
-            </div>
-            <div class="col-12 col-md-6">
-                <label class="form-label text-harmonic-forms">Передатчик управления (МГц)</label>
-                <div class="freq-input-group">
-                    <input type="number" id="filter_fCtrl" class="form-control bg-dark text-white border-secondary" value="868">
-                    <span class="freq-suffix">MHz</span>
-                </div>
-            </div>
-            
-            <div class="col-12">
-                <label class="form-label text-harmonic-forms">Диапазон графика</label>
-                <select id="filter_xspan" class="form-select bg-dark text-white border-secondary">
-                    <option value="3300">0–3.3 ГГц</option>
-                    <option value="7500" selected>0–7.5 ГГц</option>
-                </select>
-            </div>
 
-            <!-- Легенда в одну строку на мобильных -->
-            <div class="col-12">
-                <div class="filter-legend-mobile">
-                    <div class="filter-legend-item">
-                        <span class="filter-dot filter-dot-gold"></span>
-                        <small>Видео</small>
-                    </div>
-                    <div class="filter-legend-item">
-                        <span class="filter-dot filter-dot-teal"></span>
-                        <small>Управление</small>
-                    </div>
-                    <div class="filter-legend-item">
-                        <span class="filter-dot filter-dot-danger"></span>
-                        <small>Конфликты</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Кнопки в колонку на мобильных -->
-            <div class="col-12">
-                <div class="filter-btns-mobile">
-                    <button type="submit" class="btn btn-calc w-100 mb-2">
-                        <i class="fas fa-filter me-2"></i>Подобрать фильтр
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary w-100" onclick="filterCalculator.clear();">
-                        <i class="fas fa-redo me-2"></i>Сброс
-                    </button>
-                </div>
-            </div>
-
-            <!-- Рекомендации -->
-            <div class="col-12">
-                <div id="filter_reco" class="filter-recommendation"></div>
-            </div>
-        </form>
-
-        <!-- Графики в колонку на мобильных -->
-        <div class="filter-charts-mobile">
-            <div class="filter-chart-card">
-                <div class="filter-chart-header">
-                    <i class="fas fa-chart-line me-2"></i>До фильтра
-                </div>
-                <div class="filter-chart" id="filter_chartBefore"></div>
-            </div>
-            
-            <div class="filter-chart-card">
-                <div class="filter-chart-header">
-                    <i class="fas fa-wave-square me-2"></i>После фильтра
-                </div>
-                <div class="filter-chart" id="filter_chartAfter"></div>
-            </div>
+<div class="accordion-body text-white">
+  <div class="filter-calculator">
+    <form class="row g-3" onsubmit="event.preventDefault(); filterCalculator.run();">
+      <div class="col-12 col-md-6">
+        <label class="form-label text-harmonic-forms">Видеопередатчик (МГц)</label>
+        <div class="freq-input-group">
+          <input type="number" id="filter_fVideo" class="form-control bg-dark text-white border-secondary" value="1200">
+          <span class="freq-suffix">MHz</span>
         </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label text-harmonic-forms">Передатчик управления (МГц)</label>
+        <div class="freq-input-group">
+          <input type="number" id="filter_fCtrl" class="form-control bg-dark text-white border-secondary" value="868">
+          <span class="freq-suffix">MHz</span>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label text-harmonic-forms">Диапазон графика</label>
+        <select id="filter_xspan" class="form-select bg-dark text-white border-secondary">
+          <option value="3300">0–3.3 ГГц</option>
+          <option value="7500" selected>0–7.5 ГГц</option>
+        </select>
+      </div>
+
+      <!-- Кнопки -->
+      <div class="col-12 filter-btns-mobile">
+        <button type="submit" class="btn btn-calc w-100 mb-2">
+          <i class="fas fa-filter me-2"></i>Подобрать фильтр
+        </button>
+        <button type="button" class="btn btn-outline-secondary w-100" onclick="filterCalculator.clear();">
+          <i class="fas fa-redo me-2"></i>Сброс
+        </button>
+      </div>
+
+      <!-- Рекомендации -->
+      <div class="col-12">
+        <div id="filter_reco" class="filter-recommendation"></div>
+      </div>
+    </form>
+
+    <!-- ДВА БОЛЬШИХ ГРАФИКА БЕЗ ВНЕШНИХ ЗАГОЛОВКОВ -->
+    <div class="filter-charts-mobile">
+      <div class="filter-chart" id="filter_chartBefore" aria-label="График до фильтра"></div>
+      <div class="filter-chart" id="filter_chartAfter"  aria-label="График после фильтра"></div>
     </div>
-</div>          
+
+    <!-- ПАНЕЛЬ ГАРМОНИК -->
+    <div class="harmonics-panel">
+      <div class="harmonics-title"><i class="fas fa-wave-square me-2"></i>Гармоники</div>
+      <div class="harmonics-columns">
+        <div class="harm-col">
+          <div class="column-title">Видео</div>
+          <div id="harmonics-video" class="harmonics-list"></div>
+        </div>
+        <div class="harm-col">
+          <div class="column-title">Управление</div>
+          <div id="harmonics-ctrl" class="harmonics-list"></div>
+        </div>
+      </div>
+      <div class="harmonics-hint">Нажмите, чтобы ВКЛ/ВЫКЛ отображение на графиках.</div>
+    </div>
+  </div>
+</div>
+                        
 <!-- конец -->
                         
                     </div>
@@ -326,6 +312,7 @@
     <script src="mdb.umd.min.js"></script>
 </body>
 </html>
+
 
 
 
