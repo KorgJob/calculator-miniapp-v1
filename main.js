@@ -612,6 +612,7 @@ const filterCalculator = {
   BW_FIXED: 20,
   FMAX_MHZ: 7500,
   Y_MIN: -60,
+  CHART_HEIGHT: 200,
 
   BPF_TABLE: [
     { fc: 1056, bw: 30 }, { fc: 1128, bw: 34 }, { fc: 1150, bw: 32 }, { fc: 1200, bw: 40 },
@@ -636,20 +637,22 @@ const filterCalculator = {
     { name: 'ФВЧ5500', cut: 5500, forCenter: 5800 }
   ],
 
-  // helpers
   $(id){ return document.getElementById(id); },
   db(x){ if (x < 1e-6) x = 1e-6; return 20*Math.log10(x); },
   overlap(a1,a2,b1,b2){ const x0=Math.max(a1,b1), x1=Math.min(a2,b2); return (x1>x0)?[x0,x1]:null; },
 
-  // реестр индексов трасс по порядкам гармоник
-  traceIndex: { before:{video:{}, ctrl:{}}, after:{video:{}, ctrl:{}} },
+  traceIndex: { 
+    before:{video:{}, ctrl:{}}, 
+    after:{video:{}, ctrl:{}}, 
+    filters:{ after:{ video:[], rx:[], ctrl:[] } } 
+  },
 
   makeSpectrum(f0){
     const arr = [];
     if (!f0 || f0 <= 0) return arr;
     const hmax = Math.floor(this.FMAX_MHZ / f0);
     for (let n=1; n<=hmax; n++){
-      const fc = f0*n, bw = this.BW_FIXED*n, amp = 1/Math.pow(n,1.25);
+      const fc=f0*n, bw=this.BW_FIXED*n, amp=1/Math.pow(n,1.25);
       arr.push({ n, fc, f1: fc-bw/2, f2: fc+bw/2, amp });
     }
     return arr;
@@ -709,6 +712,7 @@ const filterCalculator = {
     return {
       title:{ text:title, font:{ size:16, color:'#f3b84b', family:'Arial, sans-serif' }, x:0.05 },
       margin:{ l:60, r:30, b:40, t:40 },
+      height: this.CHART_HEIGHT,
       paper_bgcolor:'rgba(28,27,25,0.9)', plot_bgcolor:'rgba(28,27,25,0.9)',
       xaxis:{ title:{ text:'' }, range:[0,xmax], gridcolor:'rgba(243,184,75,0.2)',
               zerolinecolor:'rgba(243,184,75,0.3)', tickfont:{ color:'#ccc', size:10 },
@@ -722,7 +726,6 @@ const filterCalculator = {
     };
   },
 
-  // смена видимости одного порядка гармоники на обоих графиках
   setHarmonicVisibility(type, n, visible){
     const beforeIdxs = this.traceIndex.before[type][n] || [];
     const afterIdxs  = this.traceIndex.after[type][n]  || [];
@@ -730,10 +733,105 @@ const filterCalculator = {
     if (afterIdxs.length){  afterIdxs.forEach(i  => Plotly.restyle('filter_chartAfter',  { visible }, [i ])); }
   },
 
-  // панель «Гармоники» — кнопки с частотами
+  setFilterVisibility(kind, visible){
+    const idxs = this.traceIndex.filters.after[kind] || [];
+    if (idxs.length){ idxs.forEach(i => Plotly.restyle('filter_chartAfter', { visible }, [i ])); }
+  },
+
+  ensureFiltersPanel(){
+    let panel = document.getElementById('filters-panel');
+    if (panel) return panel;
+
+    const calcRoot = document.querySelector('.filter-calculator');
+    if (!calcRoot) return null;
+
+    panel = document.createElement('div');
+    panel.className = 'harmonics-panel';
+    panel.id = 'filters-panel';
+    panel.innerHTML = `
+      <div class="harmonics-title"><i class="fas fa-filter me-2"></i>Фильтры</div>
+      <div id="filters-list" class="harmonics-list"></div>
+    `;
+
+    const charts = calcRoot.querySelector('.filter-charts-mobile');
+    if (charts) charts.after(panel); else calcRoot.appendChild(panel);
+    return panel;
+  },
+
+  getHarmonicsPanel(){
+    const calcRoot = document.querySelector('.filter-calculator');
+    if (!calcRoot) return null;
+    let panel = calcRoot.querySelector('#harmonics-panel');
+    if (panel) return panel;
+    // Находим по содержимому (#harmonics-video)
+    const byContent = calcRoot.querySelector('#harmonics-video');
+    if (byContent){
+      panel = byContent.closest('.harmonics-panel');
+      if (panel) panel.id = 'harmonics-panel'; // присваиваем id для будущих обращений
+    }
+    return panel;
+  },
+
+  arrangeOrder(){
+    // Требуемый порядок:
+    // 1) #filter_chartBefore
+    // 2) #harmonics-panel
+    // 3) #filter_chartAfter
+    // 4) #filters-panel
+    const root = document.querySelector('.filter-calculator');
+    const chartsWrap = root?.querySelector('.filter-charts-mobile');
+    if (!root || !chartsWrap) return;
+
+    const beforeEl = this.$('filter_chartBefore');
+    const afterEl  = this.$('filter_chartAfter');
+    const harmPanel = this.getHarmonicsPanel();
+    const filtersPanel = this.ensureFiltersPanel();
+
+    // Вставляем панель Гармоник между графиками (внутрь обёртки с графиками)
+    if (beforeEl && harmPanel){
+      chartsWrap.insertBefore(harmPanel, afterEl || null);
+    }
+    // Оборачиваем порядок: внутри chartsWrap будет before → harmonics → after
+    if (beforeEl) chartsWrap.insertBefore(beforeEl, chartsWrap.firstChild);
+    if (afterEl && harmPanel) chartsWrap.insertBefore(harmPanel.nextSibling === afterEl ? afterEl : afterEl, null);
+
+    // Панель Фильтров — строго после chartsWrap
+    if (filtersPanel) root.insertBefore(filtersPanel, chartsWrap.nextSibling);
+  },
+
+  buildFilterButtons(filtVideo, hpfRx, filtCtrl){
+    const panel = this.ensureFiltersPanel();
+    const list = document.getElementById('filters-list');
+    if (!panel || !list) return;
+    list.innerHTML = '';
+
+    const items = [
+      { kind:'video', label:`Видео-TX: ${filtVideo.label}` },
+      { kind:'rx',    label:`Видео-RX: ${hpfRx.name} (срез ≈ ${hpfRx.cut} МГц)` },
+      { kind:'ctrl',  label:`Управление-TX: ${filtCtrl.name} (срез ≈ ${filtCtrl.cut} МГц)` },
+    ];
+
+    items.forEach(({kind,label}) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'harm-btn on';
+      btn.textContent = label;
+      btn.setAttribute('aria-pressed','true');
+      btn.addEventListener('click', () => {
+        const isOn = btn.classList.contains('on');
+        btn.classList.toggle('on', !isOn);
+        btn.classList.toggle('off', isOn);
+        btn.setAttribute('aria-pressed', String(!isOn));
+        this.setFilterVisibility(kind, !isOn);
+      });
+      list.appendChild(btn);
+    });
+  },
+
   buildHarmonicsButtons(vPeaks, cPeaks){
     const videoBox = this.$('harmonics-video');
     const ctrlBox  = this.$('harmonics-ctrl');
+    if (!videoBox || !ctrlBox) return;
     videoBox.innerHTML = ''; 
     ctrlBox.innerHTML  = '';
 
@@ -783,9 +881,13 @@ const filterCalculator = {
 
     const vPeaks = this.makeSpectrum(fVideo);
     const cPeaks = this.makeSpectrum(fCtrl);
-    this.traceIndex = { before:{video:{}, ctrl:{}}, after:{video:{}, ctrl:{}} };
+    this.traceIndex = { 
+      before:{video:{}, ctrl:{}}, 
+      after:{video:{}, ctrl:{}}, 
+      filters:{ after:{ video:[], rx:[], ctrl:[] } } 
+    };
 
-    // ДО фильтра
+    // ---- ДО фильтра ----
     const before = [], conflBefore = [];
     const addIdx = (place, type, n, idx) => {
       const bucket = this.traceIndex[place][type];
@@ -818,21 +920,27 @@ const filterCalculator = {
       displayModeBar:true, displaylogo:false, modeBarButtonsToRemove:['pan2d','lasso2d','select2d'], responsive:true
     });
 
-    // ПОДБОР фильтров
+    // ---- ПОДБОР фильтров ----
     const filtVideo = this.pickBPFforVideo(fVideo);
     const filtCtrl  = this.pickBestLPF(fCtrl);
     const hpfRx     = this.pickHPFforRX(fVideo);
 
-    // ПОСЛЕ фильтра
+    // ---- ПОСЛЕ фильтра ----
     const after = [], conflAfter = [];
 
+    // области пропускания фильтров
     if (filtVideo.type === 'bpf'){
       after.push(this.bandTrace(filtVideo.label, filtVideo.f1, filtVideo.f2, 0, 'rgba(243,184,75,1)', 0.12));
     } else {
       after.push(this.bandTrace(filtVideo.label, 0, filtVideo.fc, 0, 'rgba(243,184,75,1)', 0.12));
     }
+    this.traceIndex.filters.after.video.push(after.length-1);
+
     after.push(this.bandTrace(hpfRx.name+' (RX)', hpfRx.cut, xmax, 0, 'rgba(243,184,75,1)', 0.08));
+    this.traceIndex.filters.after.rx.push(after.length-1);
+
     after.push(this.bandTrace(filtCtrl.name, 0, filtCtrl.cut, 0, 'rgba(16,185,129,1)', 0.12));
+    this.traceIndex.filters.after.ctrl.push(after.length-1);
 
     const gVideoTx = (f) => (filtVideo.type==='bpf' ? (f>=filtVideo.f1 && f<=filtVideo.f2) : (f<=filtVideo.fc)) ? 1 : 0;
     const gVideo   = (f) => gVideoTx(f) * (f >= hpfRx.cut ? 1 : 0);
@@ -844,7 +952,9 @@ const filterCalculator = {
         const name = `${p.n}× видео • ${Math.round(p.fc)} МГц`;
         const tr = this.bandTrace(name, p.f1, p.f2, this.db(p.amp*g), 'rgba(243,184,75,1)', 0.25);
         after.push(tr);
-        addIdx('after','video',p.n, after.length-1);
+        const j = after.length-1;
+        if (!this.traceIndex.after.video[p.n]) this.traceIndex.after.video[p.n]=[];
+        this.traceIndex.after.video[p.n].push(j);
       }
     });
 
@@ -857,7 +967,9 @@ const filterCalculator = {
         const name = `${p.n}× упр. • ${Math.round(p.fc)} МГц`;
         const tr = this.bandTrace(name, p.f1, p.f2, this.db(p.amp*g), 'rgba(16,185,129,1)', 0.25);
         after.push(tr);
-        addIdx('after','ctrl',p.n, after.length-1);
+        const j = after.length-1;
+        if (!this.traceIndex.after.ctrl[p.n]) this.traceIndex.after.ctrl[p.n]=[];
+        this.traceIndex.after.ctrl[p.n].push(j);
 
         if (vPassWithRx){
           const ov = this.overlap(p.f1,p.f2, vPassWithRx[0], vPassWithRx[1]);
@@ -870,10 +982,14 @@ const filterCalculator = {
       displayModeBar:true, displaylogo:false, modeBarButtonsToRemove:['pan2d','lasso2d','select2d'], responsive:true
     });
 
-    // Панель «Гармоники» с кнопками
+    // панели и кнопки
     this.buildHarmonicsButtons(vPeaks, cPeaks);
+    this.buildFilterButtons(filtVideo, hpfRx, filtCtrl);
 
-    // Текст-рекомендации
+    // расставляем блоки в заданном порядке
+    this.arrangeOrder();
+
+    // рекомендации
     let txt = '';
     txt += `<div class="mb-2"><i class="fas fa-tv me-2"></i><b>Видео-TX:</b> ${filtVideo.label}</div>`;
     txt += `<div class="mb-2"><i class="fas fa-satellite-dish me-2"></i><b>Видео-RX:</b> ${hpfRx.name} (срез ≈ ${hpfRx.cut} МГц)</div>`;
@@ -891,6 +1007,7 @@ const filterCalculator = {
     this.$('filter_reco').innerHTML = '';
     const v = this.$('harmonics-video'); const c = this.$('harmonics-ctrl');
     if (v) v.innerHTML = ''; if (c) c.innerHTML = '';
+    const fl = document.getElementById('filters-list'); if (fl) fl.innerHTML = '';
     Plotly.purge('filter_chartBefore');
     Plotly.purge('filter_chartAfter');
     this.$('filter_reco').innerHTML =
@@ -898,28 +1015,29 @@ const filterCalculator = {
   },
 
   init(){
-    setTimeout(()=>{ if (this.$('filter_fVideo') && this.$('filter_fCtrl')) this.run(); }, 500);
+    setTimeout(()=>{ if (this.$('filter_fVideo') && this.$('filter_fCtrl')) this.run(); }, 400);
     this.$('filter_fVideo').addEventListener('change', () => this.run());
     this.$('filter_fCtrl').addEventListener('change', () => this.run());
     this.$('filter_xspan').addEventListener('change', () => this.run());
   }
 };
 
-// Инициализация и resize при раскрытии аккордеона
 document.addEventListener('DOMContentLoaded', () => {
   filterCalculator.init();
-  const filterAccordion = document.getElementById('collapseThree');
-  if (filterAccordion) {
-    filterAccordion.addEventListener('shown.bs.collapse', () => {
+  const acc = document.getElementById('collapseThree');
+  if (acc){
+    acc.addEventListener('shown.bs.collapse', () => {
       setTimeout(() => {
-        if (typeof Plotly !== 'undefined') {
+        if (typeof Plotly !== 'undefined'){
           Plotly.Plots.resize('filter_chartBefore');
           Plotly.Plots.resize('filter_chartAfter');
         }
-      }, 200);
+      }, 150);
     });
   }
 });
+
+
 
 
 
