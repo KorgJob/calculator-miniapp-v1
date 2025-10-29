@@ -607,7 +607,6 @@ function checkChannels(harmonics, bw, dirtyEl, cleanEl) {
 
 // 3 calculate
 // 3
-// Калькулятор фильтров - изолированный объект с золотой цветовой схемой
 const filterCalculator = {
   BW_FIXED: 20,
   FMAX_MHZ: 7500,
@@ -741,7 +740,6 @@ const filterCalculator = {
   ensureFiltersPanel(){
     let panel = document.getElementById('filters-panel');
     if (panel) return panel;
-
     const calcRoot = document.querySelector('.filter-calculator');
     if (!calcRoot) return null;
 
@@ -752,7 +750,6 @@ const filterCalculator = {
       <div class="harmonics-title"><i class="fas fa-filter me-2"></i>Фильтры</div>
       <div id="filters-list" class="harmonics-list"></div>
     `;
-
     const charts = calcRoot.querySelector('.filter-charts-mobile');
     if (charts) charts.after(panel); else calcRoot.appendChild(panel);
     return panel;
@@ -763,39 +760,25 @@ const filterCalculator = {
     if (!calcRoot) return null;
     let panel = calcRoot.querySelector('#harmonics-panel');
     if (panel) return panel;
-    // Находим по содержимому (#harmonics-video)
     const byContent = calcRoot.querySelector('#harmonics-video');
     if (byContent){
       panel = byContent.closest('.harmonics-panel');
-      if (panel) panel.id = 'harmonics-panel'; // присваиваем id для будущих обращений
+      if (panel) panel.id = 'harmonics-panel';
     }
     return panel;
   },
 
   arrangeOrder(){
-    // Требуемый порядок:
-    // 1) #filter_chartBefore
-    // 2) #harmonics-panel
-    // 3) #filter_chartAfter
-    // 4) #filters-panel
     const root = document.querySelector('.filter-calculator');
     const chartsWrap = root?.querySelector('.filter-charts-mobile');
     if (!root || !chartsWrap) return;
-
     const beforeEl = this.$('filter_chartBefore');
     const afterEl  = this.$('filter_chartAfter');
     const harmPanel = this.getHarmonicsPanel();
     const filtersPanel = this.ensureFiltersPanel();
-
-    // Вставляем панель Гармоник между графиками (внутрь обёртки с графиками)
-    if (beforeEl && harmPanel){
-      chartsWrap.insertBefore(harmPanel, afterEl || null);
-    }
-    // Оборачиваем порядок: внутри chartsWrap будет before → harmonics → after
     if (beforeEl) chartsWrap.insertBefore(beforeEl, chartsWrap.firstChild);
-    if (afterEl && harmPanel) chartsWrap.insertBefore(harmPanel.nextSibling === afterEl ? afterEl : afterEl, null);
-
-    // Панель Фильтров — строго после chartsWrap
+    if (harmPanel) chartsWrap.insertBefore(harmPanel, afterEl || null);
+    if (afterEl) chartsWrap.appendChild(afterEl);
     if (filtersPanel) root.insertBefore(filtersPanel, chartsWrap.nextSibling);
   },
 
@@ -873,7 +856,7 @@ const filterCalculator = {
     }
     const fVideo = +this.$('filter_fVideo').value;
     const fCtrl  = +this.$('filter_fCtrl').value;
-    const xmax   = +this.$('filter_xspan').value;
+    const xmax   = +this.$('filter_xspan').value; // теперь может быть 3600
     if (isNaN(fVideo) || isNaN(fCtrl) || fVideo<=0 || fCtrl<=0){
       this.$('filter_reco').innerHTML = '<span style="color:#ef4444;">Ошибка: введите корректные частоты</span>';
       return;
@@ -928,7 +911,6 @@ const filterCalculator = {
     // ---- ПОСЛЕ фильтра ----
     const after = [], conflAfter = [];
 
-    // области пропускания фильтров
     if (filtVideo.type === 'bpf'){
       after.push(this.bandTrace(filtVideo.label, filtVideo.f1, filtVideo.f2, 0, 'rgba(243,184,75,1)', 0.12));
     } else {
@@ -985,19 +967,20 @@ const filterCalculator = {
     // панели и кнопки
     this.buildHarmonicsButtons(vPeaks, cPeaks);
     this.buildFilterButtons(filtVideo, hpfRx, filtCtrl);
-
-    // расставляем блоки в заданном порядке
     this.arrangeOrder();
 
-    // рекомендации
+    // рекомендации — с заголовком и кнопкой
+    const conflictStatus = conflAfter.length === 0
+      ? '<span style="color:#10b981;"><i class="fas fa-check-circle me-1"></i>Конфликты устранены</span>'
+      : `<span style="color:#ef4444;"><i class="fas fa-exclamation-triangle me-1"></i>Осталось конфликтов: ${conflAfter.length}</span>`;
+
+    const header = `<div class="harmonics-title" style="margin-bottom:8px;"><i class="fas fa-sliders-h me-2"></i><b>Фильтры, рекомендуемые к установке</b></div>`;
     let txt = '';
     txt += `<div class="mb-2"><i class="fas fa-tv me-2"></i><b>Видео-TX:</b> ${filtVideo.label}</div>`;
     txt += `<div class="mb-2"><i class="fas fa-satellite-dish me-2"></i><b>Видео-RX:</b> ${hpfRx.name} (срез ≈ ${hpfRx.cut} МГц)</div>`;
     txt += `<div class="mb-2"><i class="fas fa-gamepad me-2"></i><b>Управление-TX:</b> ${filtCtrl.name} (срез ≈ ${filtCtrl.cut} МГц)</div>`;
-    const conflictStatus = conflAfter.length === 0
-      ? '<span style="color:#10b981;"><i class="fas fa-check-circle me-1"></i>Конфликты устранены</span>'
-      : `<span style="color:#ef4444;"><i class="fas fa-exclamation-triangle me-1"></i>Осталось конфликтов: ${conflAfter.length}</span>`;
-    this.$('filter_reco').innerHTML = txt + `<div class="mt-3">${conflictStatus}</div>`;
+    const cta = `<a href="https://sector-lab.ru/filters" target="_blank" rel="noopener noreferrer" class="btn btn-calc w-100 mt-3">Заказать фильтры</a>`;
+    this.$('filter_reco').innerHTML = header + txt + `<div class="mt-3">${conflictStatus}</div>` + cta;
   },
 
   clear(){
@@ -1036,6 +1019,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+// глоссарий
+(function(){
+  const nav = document.querySelector('.gloss-nav');
+  const groups = Array.from(document.querySelectorAll('.gloss-group'));
+  if(!nav || !groups.length) return;
+
+  function openGroup(id, withScroll=true){
+    const target = document.querySelector(id);
+    if(!target) return;
+    groups.forEach(d => d.open = (d === target));
+    if(withScroll){
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+    target.querySelector('.gloss-summary')?.focus({preventScroll:true});
+  }
+
+  nav.addEventListener('click', (e)=>{
+    const a = e.target.closest('a[href^="#gl-"]');
+    if(!a) return;
+    e.preventDefault();
+    openGroup(a.getAttribute('href'));
+    history.replaceState(null, "", a.getAttribute('href'));
+  });
+
+ 
+  if(location.hash && location.hash.startsWith('#gl-')){
+    openGroup(location.hash, false);
+  }
+})();
+
 
 
 
