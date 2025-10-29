@@ -1,14 +1,17 @@
+/* =========================
+   RESET / BASE
+   ========================= */
 * {
-    margin: 0;
-    padding: 0;
-    border-radius: 0 !important;
+  margin: 0;
+  padding: 0;
+  border-radius: 0 !important;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;  
+  min-height: 100vh;
   background: #1c1b19;
-  overflow-x: hidden;  
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -28,18 +31,19 @@ body::before {
   pointer-events: none;
 }
 
-
 body::after {
   content: "";
   position: absolute;
   inset: 0;
   background-image: url("https://www.transparenttextures.com/patterns/noise.png");
-  opacity: 0.05; 
+  opacity: 0.05;
   z-index: 2;
   pointer-events: none;
 }
 
-/* Блик (анимация) */
+/* =========================
+   BLINK ANIMATION
+   ========================= */
 .blink {
   position: fixed;
   inset: 0;
@@ -51,8 +55,8 @@ body::after {
     rgba(255, 255, 255, 0.03) 60%,
     transparent 100%
   );
-  background-size: 100% 300%; /* растягиваем, чтобы было плавно */
-  animation: blinkMove 25s linear infinite; /* медленно */
+  background-size: 100% 300%;
+  animation: blinkMove 25s linear infinite;
   z-index: 3;
   pointer-events: none;
 }
@@ -66,29 +70,27 @@ body::after {
   }
 }
 
-
-
-
-/* body {
-    background-color: black;
-} */
-
+/* =========================
+   HEADER / LOGO
+   ========================= */
 .logotip_block {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 30vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30vh;
 }
 
 .logotip_block img {
-    width: 80%;
-    margin-top: 50px;
+  width: 80%;
+  margin-top: 50px;
 }
 
+/* =========================
+   ACCORDION
+   ========================= */
 .accordion-button::after {
-  filter: invert(1); 
+  filter: invert(1);
 }
-
 
 .accordion-button:not(.collapsed) {
   color: #fff;
@@ -96,12 +98,17 @@ body::after {
   box-shadow: none;
 }
 
-
 .accordion-button:not(.collapsed)::after {
   filter: invert(1);
 }
 
-/* calculator */
+.accordion_section {
+  margin-top: 150px;
+}
+
+/* =========================
+   FORM CONTROLS / BUTTONS
+   ========================= */
 .form-control {
   background-color: #222 !important;
   border: 1px solid #444 !important;
@@ -110,7 +117,7 @@ body::after {
 
 .form-control:focus {
   background-color: #222 !important;
-  border-color: #f3b84b !important; 
+  border-color: #f3b84b !important;
   box-shadow: none !important;
   color: #fff !important;
 }
@@ -131,15 +138,11 @@ body::after {
 
 .btn-calc {
   background-color: #f3b84b;
-  color: #1c1b19; 
+  color: #1c1b19;
   font-weight: bold;
   border: none;
   box-shadow: 0 4px 10px rgba(243, 184, 75, 0.4);
   transition: all 0.2s ease-in-out;
-}
-
-.accordion_section {
-  margin-top: 150px;
 }
 
 .btn-calc:hover {
@@ -151,12 +154,32 @@ body::after {
   margin-right: 20px;
 }
 
+.input-group-text {
+  min-width: 60px;
+  justify-content: center;
+}
 
+/* =========================
+   VALIDATION (calc #1)
+   ========================= */
+.is-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25) !important;
+}
+
+.field-error {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  color: #ef4444 !important;
+}
+
+/* =========================
+   FOOTER / NOTES
+   ========================= */
 footer {
   margin-top: 50px;
 }
 
-/* Справка */
 .calc-note {
   font-size: 0.85rem;
   color: #aaa;
@@ -166,31 +189,13 @@ footer {
   font-style: italic;
 }
 
-/* Стили для валидации 1 калькулятора -- корректировки */
-/* Стили для валидации */
-.is-invalid {
-    border-color: #ef4444 !important;
-    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25) !important;
-}
-
-.field-error {
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
-    color: #ef4444 !important;
-}
-
-.input-group-text {
-    min-width: 60px;
-    justify-content: center;
-}
-/* ENd Стили для валидации 1 калькулятора -- корректировки */
-
-/* Стили табов под твой дизайн */
-/* Таб-контейнер */
+/* =========================
+   TABS (harmonics calc)
+   ========================= */
 .custom-tabs {
   display: flex;
   width: 100%;
-  border-bottom: 2px solid #444; /* общая линия снизу */
+  border-bottom: 2px solid #444;
 }
 
 .custom-tabs .nav-item {
@@ -201,7 +206,7 @@ footer {
 .custom-tabs .nav-link {
   width: 100%;
   color: #aaa;
-  background: transparent !important; /* убираем фон */
+  background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
   font-weight: 600;
@@ -209,54 +214,49 @@ footer {
   transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Активный таб */
-/* Активный таб с фоном */
 .custom-tabs .nav-link.active {
   color: #f3b84b !important;
   border-bottom: 2px solid #f3b84b !important;
 }
 
-/* Контейнер для списка (гармоники и чистые каналы) */
+/* =========================
+   HARMONICS LISTS
+   ========================= */
 .results-flex {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-/* Блок гармоники */
 .harmonic-block {
-  flex: 1 1 calc(50% - 8px); /* два блока в строку, если место позволяет */
-  min-width: 250px; /* минимальная ширина */
+  flex: 1 1 calc(50% - 8px);
+  min-width: 250px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid #444;
   padding: 8px 12px;
   color: #fff;
 }
 
-/* Заголовок гармоники */
 .harmonic-header {
   font-weight: bold;
   color: #f3b84b;
   margin-bottom: 4px;
 }
 
-/* Перечисление каналов */
 .harmonic-block .badge {
   font-size: 0.85rem;
 }
 
-/* Подпись про отсутствие пересечений */
 .no-overlap {
   font-size: 0.85rem;
   color: #bbb;
 }
 
-/* Чистые каналы — аналогично */
 .clean-channels {
   display: flex;
   flex-wrap: wrap;
-  
 }
+
 .clean-channels .badge {
   background: #198754;
   font-size: 0.85rem;
@@ -267,9 +267,9 @@ footer {
   color: #ffffff;
 }
 
-
-/* правки */
-/* Стили для разделения чистых частот на два столбца */
+/* =========================
+   CLEAN FREQUENCIES GRID
+   ========================= */
 .clean-frequencies-container {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -309,23 +309,20 @@ footer {
   text-align: center;
 }
 
-
-/* правки №2 */
-/* Стили для гармоник-форм */
-/* Контейнер */
+/* =========================
+   FREQ INPUTS (suffix style)
+   ========================= */
 .freq-input-group {
   display: flex;
   align-items: center;
   position: relative;
 }
 
-/* Поле */
 .freq-input-group .form-control {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-/* Суффикс */
 .freq-input-group .freq-suffix {
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
@@ -340,7 +337,6 @@ footer {
   transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
 }
 
-/* При фокусе на input — подсветка и у MHz */
 .freq-input-group:focus-within .form-control {
   border-color: #f3b84b;
 }
@@ -350,254 +346,470 @@ footer {
   color: #f3b84b;
 }
 
-
-
-
-/* Глассарий */
-
-
-
-/* 3 калькулятор */
-/* Стили для калькулятора фильтров - МОБИЛЬНАЯ ВЕРСИЯ */
-.filter-calculator {
-    position: relative;
-    z-index: 10;
+.freq-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: center;
 }
 
-/* Легенда для мобильных */
+/* =========================
+   GLOSSARY
+   ========================= */
+.gloss {
+  margin-top: 48px;
+  margin-bottom: 56px;
+}
+
+.gloss-title {
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #f3b84b;
+  border: 1px solid #5a4a28;
+  background: rgba(243, 184, 75, 0.08);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gloss-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.gloss-nav a {
+  color: #f3b84b;
+  text-decoration: none;
+  border: 1px solid #5a4a28;
+  padding: 4px 10px;
+  font-weight: 700;
+  border-radius: 0;
+  transition: all 0.15s ease;
+}
+
+.gloss-nav a:hover,
+.gloss-nav a:focus {
+  background: #f3b84b;
+  color: #1c1b19;
+  outline: none;
+}
+
+.gloss-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gloss-group {
+  border: 1px solid #333;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0;
+  position: relative;
+}
+
+.gloss-group::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  background: #f3b84b;
+}
+
+.gloss-summary {
+  margin: 0;
+  padding: 10px 14px 10px 18px;
+  color: #f3b84b;
+  font-weight: 800;
+  cursor: pointer;
+  border-bottom: 1px dashed #3a3a3a;
+  list-style: none;
+  user-select: none;
+}
+
+.gloss-summary::-webkit-details-marker {
+  display: none;
+}
+
+.gloss-body {
+  padding: 10px 14px 12px 22px;
+}
+
+.gloss-item {
+  display: list-item;
+  list-style: disc;
+  margin-left: 1.1rem;
+  padding: 6px 0;
+  color: #cfcfcf;
+}
+
+.gloss-item dt {
+  display: inline;
+  color: #fff;
+  font-weight: 700;
+}
+
+.gloss-item dt::after {
+  content: " — ";
+  font-weight: 400;
+  color: #cfcfcf;
+}
+
+.gloss-item dd {
+  display: inline;
+  margin: 0;
+  color: #cfcfcf;
+}
+
+.gloss-form {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #3a3a3a;
+}
+
+.gloss-form-title {
+  color: #f3b84b;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.gloss-input {
+  background: #222 !important;
+  border-color: #444 !important;
+  border-radius: 0 !important;
+}
+
+.gloss-input:focus {
+  border-color: #f3b84b !important;
+}
+
+/* =========================
+   FILTER CALC (calc #3)
+   ========================= */
+.filter-calculator {
+  position: relative;
+  z-index: 10;
+}
+
 .filter-legend-mobile {
-    display: flex;
-    justify-content: space-around;
-    gap: 10px;
-    margin: 15px 0;
-    padding: 12px;
-    background: rgba(243, 184, 75, 0.1);
-    border: 1px solid rgba(243, 184, 75, 0.3);
-    border-radius: 8px;
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+  margin: 15px 0;
+  padding: 12px;
+  background: rgba(243, 184, 75, 0.1);
+  border: 1px solid rgba(243, 184, 75, 0.3);
+  border-radius: 8px;
 }
 
 .filter-legend-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.75rem;
-    color: #f3b84b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: #f3b84b;
 }
 
 .filter-dot {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .filter-dot-gold {
-    background: #f3b84b;
-    box-shadow: 0 0 8px rgba(243, 184, 75, 0.5);
+  background: #f3b84b;
+  box-shadow: 0 0 8px rgba(243, 184, 75, 0.5);
 }
 
 .filter-dot-teal {
-    background: #10b981;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
 }
 
 .filter-dot-danger {
-    background: #ef4444;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
-/* Кнопки для мобильных */
 .filter-btns-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 15px 0;
 }
 
-/* Карточки графиков */
 .filter-charts-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .filter-chart-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #444;
-    border-radius: 12px;
-    padding: 0;
-    overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
 }
 
 .filter-chart-header {
-    background: rgba(243, 184, 75, 0.15);
-    padding: 12px 15px;
-    font-weight: 600;
-    color: #f3b84b;
-    border-bottom: 1px solid rgba(243, 184, 75, 0.3);
-    font-size: 0.9rem;
+  background: rgba(243, 184, 75, 0.15);
+  padding: 12px 15px;
+  font-weight: 600;
+  color: #f3b84b;
+  border-bottom: 1px solid rgba(243, 184, 75, 0.3);
+  font-size: 0.9rem;
 }
 
 .filter-chart {
   width: 100%;
 }
 
-/* ПАНЕЛЬ ГАРМОНИК */
-.harmonics-panel{
-  background: rgba(255,255,255,0.05);
+.harmonics-panel {
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid #444;
   border-radius: 12px;
   padding: 12px;
 }
-.harmonics-title{
-  color:#f3b84b;
-  font-weight:600;
+
+.harmonics-title {
+  color: #f3b84b;
+  font-weight: 600;
   margin-bottom: 8px;
 }
-.harmonics-columns{
-  display:grid;
+
+.harmonics-columns {
+  display: grid;
   grid-template-columns: 1fr 1fr;
-  gap:12px;
-}
-.harmonics-list{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-.harmonics-hint{
-  color:#999; font-size:.85rem; margin-top:8px;
+  gap: 12px;
 }
 
-/* Кнопки-тогглы гармоник */
-.harm-btn{
-  cursor:pointer;
-  user-select:none;
-  border:1px solid #555;
-  border-radius:8px;
-  padding:6px 10px;
-  font-size:.9rem;
-  line-height:1;
-  transition:all .15s ease;
-}
-.harm-btn.on{
-  background: rgba(243,184,75,.15);
-  border-color: rgba(243,184,75,.6);
-  color:#f3b84b;
-  box-shadow: 0 0 0 1px rgba(243,184,75,.25) inset;
-}
-.harm-btn.off{
-  background: rgba(255,255,255,.03);
-  border-color:#444;
-  color:#bbb;
-  opacity:.7;
-}
-.harm-btn:focus{ outline: none; box-shadow: 0 0 0 2px rgba(243,184,75,.25); }
-
-@media (min-width: 768px){
-  .filter-chart{ height: 420px; }
+.harmonics-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-/* Рекомендации */
+.harmonics-hint {
+  color: #999;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+/* harmonics toggle buttons */
+.harm-btn {
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.harm-btn.on {
+  background: rgba(243, 184, 75, 0.15);
+  border-color: rgba(243, 184, 75, 0.6);
+  color: #f3b84b;
+  box-shadow: 0 0 0 1px rgba(243, 184, 75, 0.25) inset;
+}
+
+.harm-btn.off {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: #444;
+  color: #bbb;
+  opacity: 0.7;
+}
+
+.harm-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(243, 184, 75, 0.25);
+}
+
+/* recommendations box */
 .filter-recommendation {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #444;
-    border-radius: 8px;
-    padding: 15px;
-    margin: 15px 0;
-    font-size: 0.9rem;
-    line-height: 1.5;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .filter-recommendation b {
-    color: #f3b84b;
+  color: #f3b84b;
 }
 
-/* Адаптивность для планшетов и десктопов */
-@media (min-width: 768px) {
-    .filter-legend-mobile {
-        justify-content: center;
-        gap: 30px;
-    }
-    
-    .filter-legend-item {
-        flex-direction: row;
-        font-size: 0.85rem;
-    }
-    
-    .filter-btns-mobile {
-        flex-direction: row;
-    }
-    
-    .filter-btns-mobile .btn {
-        flex: 1;
-    }
-    
-    .filter-charts-mobile {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-    
-    .filter-chart {
-        height: 320px;
-    }
-}
-
-/* Переопределение стилей Plotly под золотую тему */
+/* =========================
+   PLOTLY OVERRIDES
+   ========================= */
 .filter-calculator .js-plotly-plot .plotly .modebar {
-    background: rgba(28, 27, 25, 0.95) !important;
-    border: 1px solid #444 !important;
-    border-radius: 4px !important;
+  background: rgba(28, 27, 25, 0.95) !important;
+  border: 1px solid #444 !important;
+  border-radius: 4px !important;
 }
 
 .filter-calculator .js-plotly-plot .plotly .modebar-btn {
-    color: #bbb !important;
+  color: #bbb !important;
 }
 
 .filter-calculator .js-plotly-plot .plotly .modebar-btn:hover {
-    background: rgba(243, 184, 75, 0.3) !important;
-    color: #f3b84b !important;
+  background: rgba(243, 184, 75, 0.3) !important;
+  color: #f3b84b !important;
 }
 
 .filter-calculator .js-plotly-plot .plotly .modebar-btn.active .icon path {
-    fill: #f3b84b !important;
+  fill: #f3b84b !important;
 }
 
+/* =========================
+   RESET BUTTON (gold theme)
+   ========================= */
+.btn-reset {
+  --gold: #f3b84b;
+  --bg: #1c1b19;
+  --border: #5a4a28;
 
-/* Mobile */
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: 0 0 0 0 rgba(243, 184, 75, 0);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.btn-reset i {
+  opacity: 0.9;
+  transition: transform 0.15s ease;
+}
+
+.btn-reset:hover {
+  background: var(--gold);
+  color: #1c1b19;
+  border-color: var(--gold);
+  box-shadow: 0 6px 14px rgba(243, 184, 75, 0.35);
+}
+
+.btn-reset:hover i {
+  transform: rotate(-15deg);
+}
+
+.btn-reset:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 8px rgba(243, 184, 75, 0.25);
+}
+
+.btn-reset:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(243, 184, 75, 0.25);
+  border-color: var(--gold);
+}
+
+.btn-reset:disabled,
+.btn-reset.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: transparent;
+  color: #bda473;
+  border-color: #3a311d;
+  box-shadow: none;
+}
+
+/* =========================
+   MEDIA QUERIES (ALL BELOW)
+   ========================= */
+
+/* phones narrow */
+@media (max-width: 420px) {
+  .freq-duo {
+    grid-template-columns: 1fr;
+  }
+
+  label[for="center_freq"]::after {
+    content: "Центр. част.";
+    display: block;
+    font-size: 1rem;
+  }
+
+  label[for="center_freq"] {
+    font-size: 0;
+  }
+}
+
+/* small mobile portrait range */
 @media (min-width: 350px) and (max-width: 430px) {
-    .logotip_block {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 30vh;
-    }
+  .logotip_block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30vh;
+  }
 
   .logotip_block img {
-      width: 80%;
+    width: 80%;
   }
 
   .accordion_section {
     margin-top: 15px;
   }
-
-
 }
 
-@media (max-width: 420px) {
-  label[for="center_freq"]::after {
-    content: "Центр. част."; 
-    display: block;
-    font-size: 1rem;
+/* glossary spacing on xs */
+@media (max-width: 576px) {
+  .gloss-summary {
+    padding: 10px;
   }
-  label[for="center_freq"] {
-    font-size: 0; 
+  .gloss-body {
+    padding: 10px 12px;
   }
 }
 
+/* tablets and up */
+@media (min-width: 768px) {
+  .filter-legend-mobile {
+    justify-content: center;
+    gap: 30px;
+  }
 
+  .filter-legend-item {
+    flex-direction: row;
+    font-size: 0.85rem;
+  }
 
+  .filter-btns-mobile {
+    flex-direction: row;
+  }
 
+  .filter-btns-mobile .btn {
+    flex: 1;
+  }
+
+  .filter-charts-mobile {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .filter-chart {
+    height: 320px;
+  }
+}
