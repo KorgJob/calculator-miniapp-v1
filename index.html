@@ -36,7 +36,7 @@
 
     </header>
 
-    <main>
+<main>
         <section class="accordion_section container">
         
             <div class="accordion" id="accordionExample">
@@ -58,60 +58,76 @@
                     data-bs-parent="#accordionExample">
 
                         <div class="accordion-body text-white">
-                            <form class="row g-3" onsubmit="event.preventDefault(); calculate();">
-                                <div class="col-md-6">
-                                <label for="freq" class="form-label">Частота (МГц)</label>
-                                <input type="number" class="form-control bg-dark text-white border-secondary" id="freq" value="900">
-                                </div>
-                                <div class="col-md-6">
-                                <label for="h_tx" class="form-label">Высота передатчика (м)</label>
-                                <input type="number" class="form-control bg-dark text-white border-secondary" id="h_tx" value="50">
-                                </div>
-                                <div class="col-md-6">
-                                <label for="h_rx" class="form-label">Высота приёмника (м)</label>
-                                <input type="number" class="form-control bg-dark text-white border-secondary" id="h_rx" value="2">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="p_tx_dbm" class="form-label">Мощность передатчика</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control bg-dark text-white border-secondary" id="p_tx_dbm" value="20" step="0.1">
-                                        <span class="input-group-text bg-dark text-white border-secondary dbm-label">дБм</span>
-                                        <input type="number" class="form-control bg-dark text-white border-secondary" id="p_tx_w" value="0.1" step="0.001">
-                                        <span class="input-group-text bg-dark text-white border-secondary">Вт</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                <label for="g_tx" class="form-label">Усиление антенны передатчика (дБи)</label>
-                                <input type="number" class="form-control bg-dark text-white border-secondary" id="g_tx" value="2">
-                                </div>
-                                <div class="col-md-6">
-                                <label for="g_rx" class="form-label">Усиление антенны приёмника (дБи)</label>
-                                <input type="number" class="form-control bg-dark text-white border-secondary" id="g_rx" value="3">
-                                </div>
-                                <div class="col-md-6">
-                                <label for="sensitivity" class="form-label">Чувствительность приёмника (дБм)</label>
-                                <input type="number" class="form-control bg-dark text-white border-secondary" id="sensitivity" value="-100">
-                                </div>
-                                <div class="col-md-6">
-                                <label for="loss_other" class="form-label">Прочие потери (дБ)</label>
-                                <input type="number" class="form-control bg-dark text-white border-secondary" id="loss_other" value="3">
-                                </div>
+    <form class="row g-3" onsubmit="event.preventDefault(); calculate();">
+        <div class="col-md-6">
+            <label for="freq" class="form-label">Частота (МГц)</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" id="freq" value="900" step="0.1">
+        </div>
+        <div class="col-md-6">
+            <label for="h_tx" class="form-label">Высота передатчика (м)</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" id="h_tx" value="50" step="0.1">
+        </div>
+        <div class="col-md-6">
+            <label for="h_rx" class="form-label">Высота приёмника (м)</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" id="h_rx" value="2" step="0.1">
+        </div>
+        <div class="col-md-6">
+            <label for="p_tx_dbm" class="form-label">Мощность передатчика</label>
+            <!-- /index.html — БЛОК "Мощность передатчика" (замена) -->
+<div class="col-md-6">
+  <label for="p_tx_dbm" class="form-label">Мощность передатчика</label>
 
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-calc w-100 fw-bold">Рассчитать</button>
-                                </div>
+  <!-- две одинаковые по стилю пары как в MHz -->
+  <div class="freq-duo">
+    <div class="freq-input-group">
+      <input type="number"
+             class="form-control bg-dark text-white border-secondary"
+             id="p_tx_dbm" value="20" step="0.1">
+      <span class="freq-suffix">дБм</span>
+    </div>
 
-                                <div class="col-12">
-                                    <div class="result mt-3" id="result"></div>
-                                </div>
-                                
-                                <div class="col-12">
-                                    <div class="calc-note mt-3">
-                                        Реальная дальность радиосвязи будет зависеть в том числе от погодных условий, препятствий, распространения радиосигнала, наличия помехи в радиоканале.
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+    <div class="freq-input-group">
+      <input type="number"
+             class="form-control bg-dark text-white border-secondary"
+             id="p_tx_w" value="0.1" step="0.001">
+      <span class="freq-suffix">Вт</span>
+    </div>
+  </div>
+</div>
+
+        </div>
+        <div class="col-md-6">
+            <label for="g_tx" class="form-label">Усиление антенны передатчика (дБи)</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" id="g_tx" value="2" step="1">
+        </div>
+        <div class="col-md-6">
+            <label for="g_rx" class="form-label">Усиление антенны приёмника (дБи)</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" id="g_rx" value="3" step="1">
+        </div>
+        <div class="col-md-6">
+            <label for="sensitivity" class="form-label">Чувствительность приёмника (дБм)</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" id="sensitivity" value="-100" step="0.1">
+        </div>
+        <div class="col-md-6">
+            <label for="loss_other" class="form-label">Прочие потери (дБ)</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" id="loss_other" value="3" step="0.1">
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-calc w-100 fw-bold">Рассчитать</button>
+        </div>
+
+        <div class="col-12">
+            <div class="result mt-3" id="result"></div>
+        </div>
+        
+        <div class="col-12">
+            <div class="calc-note mt-3">
+                Реальная дальность радиосвязи будет зависеть в том числе от погодных условий, препятствий, распространения радиосигнала, наличия помехи в радиоканале.
+            </div>
+        </div>
+    </form>
+</div>
 
                     </div>
                 </div>
@@ -223,10 +239,9 @@
                     <div id="collapseThree" class="accordion-collapse collapse"
                     aria-labelledby="headingThree"
                     data-bs-parent="#accordionExample">
-                    
-
-                        <!-- начало -->
-
+                    <!-- начало -->
+          
+                    <!-- ===== [HTML] Фрагмент 3-го калькулятора: заменить ВНУТРИ #collapseThree ===== -->
 <div class="accordion-body text-white">
   <div class="filter-calculator">
     <form class="row g-3" onsubmit="event.preventDefault(); filterCalculator.run();">
@@ -247,10 +262,12 @@
 
       <div class="col-12">
         <label class="form-label text-harmonic-forms">Диапазон графика</label>
-        <select id="filter_xspan" class="form-select bg-dark text-white border-secondary">
-          <option value="3300">0–3.3 ГГц</option>
-          <option value="7500" selected>0–7.5 ГГц</option>
-        </select>
+        <!-- HTML: замени опции диапазона -->
+<select id="filter_xspan" class="form-select bg-dark text-white border-secondary">
+  <option value="3600">0–3.6 ГГц</option>
+  <option value="7500" selected>0–7.5 ГГц</option>
+</select>
+
       </div>
 
       <!-- Кнопки -->
@@ -258,9 +275,11 @@
         <button type="submit" class="btn btn-calc w-100 mb-2">
           <i class="fas fa-filter me-2"></i>Подобрать фильтр
         </button>
-        <button type="button" class="btn btn-outline-secondary w-100" onclick="filterCalculator.clear();">
-          <i class="fas fa-redo me-2"></i>Сброс
-        </button>
+        <!-- Заменить исходную кнопку сброса -->
+<button type="button" class="btn btn-reset w-100" onclick="filterCalculator.clear();">
+  <i class="fas fa-redo me-2"></i>Сброс
+</button>
+
       </div>
 
       <!-- Рекомендации -->
@@ -292,9 +311,9 @@
     </div>
   </div>
 </div>
-                        
+
+
 <!-- конец -->
-                        
                     </div>
                 </div>
 
@@ -304,7 +323,216 @@
 
 
         </section>
+<!-- глоссарий -->
+<section class="gloss container" id="glossary">
+  <!-- Заголовок как на референсе -->
+  <div class="gloss-title">Справочник терминов по&nbsp;радиосвязи</div>
+
+  <!-- Навигация по буквам -->
+  <nav class="gloss-nav" aria-label="Быстрый переход по буквам">
+    <a href="#gl-A">А</a><a href="#gl-Б">Б</a><a href="#gl-В">В</a>
+    <a href="#gl-Г">Г</a><a href="#gl-Д">Д</a><a href="#gl-И">И</a>
+    <a href="#gl-К">К</a><a href="#gl-Л">Л</a><a href="#gl-М">М</a>
+    <a href="#gl-Н">Н</a><a href="#gl-О">О</a><a href="#gl-П">П</a>
+    <a href="#gl-Р">Р</a><a href="#gl-С">С</a><a href="#gl-Т">Т</a>
+    <a href="#gl-У">У</a><a href="#gl-Ф">Ф</a><a href="#gl-Ц">Ц</a>
+    <a href="#gl-Ш">Ш</a>
+  </nav>
+
+  <div class="gloss-list">
+    <!-- А -->
+    <details class="gloss-group" id="gl-A" open>
+      <summary class="gloss-summary">А</summary>
+      <div class="gloss-body">
+        <div class="gloss-item">
+          <dt>Амплитуда</dt><dd>максимальное значение переменного сигнала (напряжения или тока). В радиосвязи влияет на мощность передаваемого сигнала.</dd>
+        </div>
+        <div class="gloss-item">
+          <dt>Амплитудная модуляция (AM)</dt><dd>способ передачи информации изменением амплитуды несущей волны.</dd>
+        </div>
+        <div class="gloss-item">
+          <dt>Антенна</dt><dd>устройство для излучения и приёма радиоволн. Бывает дипольная, рамочная, направленная, штырёвая и др.</dd>
+        </div>
+      </div>
+    </details>
+
+    <!-- Б -->
+    <details class="gloss-group" id="gl-Б">
+      <summary class="gloss-summary">Б</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Базовая станция</dt><dd>стационарный передатчик/приёмник, обслуживающий радиосвязь в определённой зоне (например, сотовая вышка).</dd></div>
+        <div class="gloss-item"><dt>Бэнд (Band)</dt><dd>диапазон радиочастот, выделенный для определённых целей.</dd></div>
+      </div>
+    </details>
+
+    <!-- В -->
+    <details class="gloss-group" id="gl-В">
+      <summary class="gloss-summary">В</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Ватт (Вт)</dt><dd>единица измерения мощности радиосигнала. Маленькие радиостанции 0,5–5 Вт, мощные — десятки и сотни ватт.</dd></div>
+        <div class="gloss-item"><dt>Волновое сопротивление</dt><dd>характеристика линии передачи (обычно 50 Ом или 75 Ом).</dd></div>
+      </div>
+    </details>
+
+    <!-- Г -->
+    <details class="gloss-group" id="gl-Г">
+      <summary class="gloss-summary">Г</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Гетеродин</dt><dd>генератор колебаний для преобразования частоты в приёмниках супергетеродинного типа.</dd></div>
+        <div class="gloss-item"><dt>Гармоники</dt><dd>кратные частоты основного сигнала, часто мешающие радиоприёму.</dd></div>
+      </div>
+    </details>
+
+    <!-- Д -->
+    <details class="gloss-group" id="gl-Д">
+      <summary class="gloss-summary">Д</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Декодер</dt><dd>выделяет полезную информацию из модулированного сигнала.</dd></div>
+        <div class="gloss-item"><dt>Дуплекс</dt><dd>режим связи с одновременной передачей и приёмом на разных частотах.</dd></div>
+      </div>
+    </details>
+
+    <!-- И -->
+    <details class="gloss-group" id="gl-И">
+      <summary class="gloss-summary">И</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Ионосфера</dt><dd>слой атмосферы, отражающий радиоволны и обеспечивающий дальнюю связь (особенно КВ).</dd></div>
+        <div class="gloss-item"><dt>Импеданс</dt><dd>полное сопротивление цепи переменного тока (активная + реактивная части).</dd></div>
+      </div>
+    </details>
+
+    <!-- К -->
+    <details class="gloss-group" id="gl-К">
+      <summary class="gloss-summary">К</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>КВ (короткие волны)</dt><dd>диапазон 3–30 МГц для дальней радиосвязи.</dd></div>
+        <div class="gloss-item"><dt>Коаксиальный кабель (коаксиал)</dt><dd>кабель для передачи РЧ сигнала от антенны к приёмнику/передатчику.</dd></div>
+        <div class="gloss-item"><dt>Кодер</dt><dd>преобразует информацию в форму, удобную для передачи по радиоканалу.</dd></div>
+      </div>
+    </details>
+
+    <!-- Л -->
+    <details class="gloss-group" id="gl-Л">
+      <summary class="gloss-summary">Л</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Линия передачи</dt><dd>кабель/тракт между антенной и аппаратурой.</dd></div>
+        <div class="gloss-item"><dt>Логопериодическая антенна</dt><dd>направленная антенна с широким рабочим диапазоном.</dd></div>
+      </div>
+    </details>
+
+    <!-- М -->
+    <details class="gloss-group" id="gl-М">
+      <summary class="gloss-summary">М</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Модуляция</dt><dd>«наложение» информации (речь/данные) на несущую волну.</dd></div>
+        <div class="gloss-item"><dt>Мощность передатчика</dt><dd>количество энергии, излучаемое в эфир.</dd></div>
+      </div>
+    </details>
+
+    <!-- Н -->
+    <details class="gloss-group" id="gl-Н">
+      <summary class="gloss-summary">Н</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Несущая частота</dt><dd>основной радиосигнал, на который накладывается модуляция.</dd></div>
+        <div class="gloss-item"><dt>Направленность антенны</dt><dd>способность принимать/излучать в определённом направлении.</dd></div>
+      </div>
+    </details>
+
+    <!-- О -->
+    <details class="gloss-group" id="gl-О">
+      <summary class="gloss-summary">О</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Отражение сигнала</dt><dd>возврат радиоволн от поверхностей или слоёв атмосферы.</dd></div>
+        <div class="gloss-item"><dt>Осциллограф</dt><dd>прибор для визуализации сигналов и колебаний.</dd></div>
+      </div>
+    </details>
+
+    <!-- П -->
+    <details class="gloss-group" id="gl-П">
+      <summary class="gloss-summary">П</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Приёмник (RX)</dt><dd>принимает радиосигналы и выделяет информацию.</dd></div>
+        <div class="gloss-item"><dt>Пропускание радиоволн</dt><dd>способность сигнала проходить через среды (стены, атмосфера, ионосфера).</dd></div>
+      </div>
+    </details>
+
+    <!-- Р -->
+    <details class="gloss-group" id="gl-Р">
+      <summary class="gloss-summary">Р</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Радиочастота (РЧ)</dt><dd>3 кГц–300 ГГц.</dd></div>
+        <div class="gloss-item"><dt>Ретранслятор</dt><dd>принимает сигнал на одной частоте и передаёт на другой.</dd></div>
+      </div>
+    </details>
+
+    <!-- С -->
+    <details class="gloss-group" id="gl-С">
+      <summary class="gloss-summary">С</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Супергетеродинный приёмник</dt><dd>преобразование во внутреннюю ПЧ.</dd></div>
+        <div class="gloss-item"><dt>Станция радиосвязи</dt><dd>комплекс приёмопередающей аппаратуры.</dd></div>
+      </div>
+    </details>
+
+    <!-- Т -->
+    <details class="gloss-group" id="gl-Т">
+      <summary class="gloss-summary">Т</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Трансивер (TX)</dt><dd>передатчик и приёмник в одном устройстве.</dd></div>
+        <div class="gloss-item"><dt>Ток утечки</dt><dd>нежелательный ток в изоляции кабелей и конденсаторов.</dd></div>
+      </div>
+    </details>
+
+    <!-- У -->
+    <details class="gloss-group" id="gl-У">
+      <summary class="gloss-summary">У</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>УКВ</dt><dd>30–300 МГц.</dd></div>
+        <div class="gloss-item"><dt>Усилитель мощности</dt><dd>увеличивает амплитуду радиосигнала перед передачей в антенну.</dd></div>
+      </div>
+    </details>
+
+    <!-- Ф -->
+    <details class="gloss-group" id="gl-Ф">
+      <summary class="gloss-summary">Ф</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Фазовая модуляция (PM)</dt><dd>передача информации изменением фазы несущей.</dd></div>
+        <div class="gloss-item"><dt>Фильтр</dt><dd>устройство для выделения нужных частот и подавления помех.</dd></div>
+      </div>
+    </details>
+
+    <!-- Ц -->
+    <details class="gloss-group" id="gl-Ц">
+      <summary class="gloss-summary">Ц</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Цифровая радиосвязь</dt><dd>DMR, TETRA, LTE и др.</dd></div>
+        <div class="gloss-item"><dt>Цифровая обработка сигналов (DSP)</dt><dd>фильтрация/анализ на процессорах.</dd></div>
+      </div>
+    </details>
+
+    <!-- Ш -->
+    <details class="gloss-group" id="gl-Ш">
+      <summary class="gloss-summary">Ш</summary>
+      <div class="gloss-body">
+        <div class="gloss-item"><dt>Шумы</dt><dd>случайные помехи, ограничивающие качество приёма.</dd></div>
+        <div class="gloss-item"><dt>Ширина полосы пропускания</dt><dd>частотный диапазон, который система может передать/принять.</dd></div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Сухая форма без отправки -->
+  <div class="gloss-form">
+    <div class="gloss-form-title"><i class="fas fa-plus-circle me-2"></i>Не нашли нужного определения?</div>
+    <div class="row g-2">
+      <div class="col-12 col-md-4"><input type="text" class="form-control gloss-input" placeholder="Термин"></div>
+      <div class="col-12 col-md-8"><textarea class="form-control gloss-input" rows="2" placeholder="Короткое определение"></textarea></div>
+      <div class="col-12"><button type="button" class="btn btn-reset w-100">Отправить нам</button></div>
+    </div>
+  </div>
+</section>
+
     </main>
+    
     <footer></footer>
 
     <script src="main.js"></script>
@@ -312,6 +540,7 @@
     <script src="mdb.umd.min.js"></script>
 </body>
 </html>
+
 
 
 
